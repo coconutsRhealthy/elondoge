@@ -22,7 +22,8 @@ public class TweetMachine {
                 .setOAuthConsumerKey(consumerKey)
                 .setOAuthConsumerSecret(consumerSecret)
                 .setOAuthAccessToken(accessToken)
-                .setOAuthAccessTokenSecret(accessSecret);
+                .setOAuthAccessTokenSecret(accessSecret)
+                .setTweetModeExtended(true);
 
         TwitterFactory factory = new TwitterFactory(cb.build());
         Twitter twitter = factory.getInstance();
@@ -55,7 +56,8 @@ public class TweetMachine {
                 .setOAuthConsumerKey(consumerKey)
                 .setOAuthConsumerSecret(consumerSecret)
                 .setOAuthAccessToken(accessToken)
-                .setOAuthAccessTokenSecret(accessSecret);
+                .setOAuthAccessTokenSecret(accessSecret)
+                .setTweetModeExtended(true);
 
         TwitterFactory factory = new TwitterFactory(cb.build());
         Twitter twitter = factory.getInstance();
