@@ -31,12 +31,12 @@ public class BinanceMachine {
     }
 
     public NewOrderResponse placeDogeMarketBuyOrder() {
-        NewOrderResponse orderResponse = client.newOrder(marketBuy("DOGEBTC", "30000"));
+        NewOrderResponse orderResponse = client.newOrder(marketBuy("DOGEBTC", "60000"));
         return orderResponse;
     }
 
     public void placeDogeLimitSellOrder(String limit) {
-        client.newOrder(limitSell("DOGEBTC", TimeInForce.GTC, "30000", limit));
+        client.newOrder(limitSell("DOGEBTC", TimeInForce.GTC, "60000", limit));
     }
 
     public void placeDogeLimitBuyOrder() {
