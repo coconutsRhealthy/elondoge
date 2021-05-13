@@ -1,6 +1,5 @@
 package com.lennart.binance;
 
-import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -15,7 +14,7 @@ public class BackTest {
     }
 
     private void doTheBackTest() {
-        double bankroll = 100;
+        double bankroll = 132;
         int intBankroll;
 
         List<String> coinsToBuy;
@@ -23,7 +22,6 @@ public class BackTest {
         int deltaIndex = 1;
 
         Momentum momentum = new Momentum();
-        //initializeBidAskSpreadMap();
 
         Map<String, Double> pctChangeBase = momentum.getPercentChangeForAllPairs(startIndex, deltaIndex);
         pctChangeBase = correctForBidAskSpread(pctChangeBase);
@@ -31,8 +29,12 @@ public class BackTest {
 
         int amountOfTrades = 0;
 
+        List<Integer> amountOfCoinsToBuyPerRound = new ArrayList<>();
+
         for(int i = startIndex; i < (startIndex + 499); i++) {
             coinsToBuy = momentum.getCoinsToBuy(pctChangeBase, 60);
+
+            amountOfCoinsToBuyPerRound.add(coinsToBuy.size());
 
             //als je al een positie hebt, en hij is voor de volgende ronde weer geidentificeerd, dan moet je hem houden...
 
@@ -48,7 +50,7 @@ public class BackTest {
             Map<String, Double> profits = momentum.getProfitOfBoughtCoins(coinsToBuy, pctChangeResult);
 
             for(Map.Entry<String, Double> entry : profits.entrySet()) {
-                bankroll = bankroll * entry.getValue();
+                bankroll = (bankroll - 25) + (25 * entry.getValue());
                 intBankroll = (int) bankroll;
                 System.out.println(intBankroll);
                 amountOfTrades = amountOfTrades + 2;
@@ -62,6 +64,12 @@ public class BackTest {
 
         System.out.println("Final bankroll: " + bankroll);
         System.out.println("Amount of trades: " + amountOfTrades);
+
+        Collections.sort(amountOfCoinsToBuyPerRound);
+
+        System.out.println();
+        System.out.println("AMOUNT OF COINS:");
+        amountOfCoinsToBuyPerRound.forEach(amount -> System.out.println(amount));
     }
 
     private List<String> getRandomCoins(int amount) {

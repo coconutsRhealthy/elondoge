@@ -29,8 +29,8 @@ public class HistoricalPrices {
 
     private BinanceApiRestClient getBinanceApiClient() {
         BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(
-                "fZTmwFWYy72idRzBXhVQL1hCT6PpcpDtjhEtYocPOV2Ig5zQncUwWxAEBbSqbMIw",
-                "QF5eoAFBRUvapYsswIqHPnRIIwsR950DC5Amzlp9mFJLSrOBHlESHC5Owpn8COJc");
+                "zzz",
+                "zzz");
         return factory.newRestClient();
     }
 
