@@ -37,25 +37,25 @@ public class ElonTweetBot {
     }
 
     public static void main(String[] args) throws Exception {
-        Set<String> loggers = new HashSet<>(Arrays.asList("org.apache.http", "groovyx.net.http"));
-
-        for(String log:loggers) {
-            Logger logger = (Logger) LoggerFactory.getLogger(log);
-            logger.setLevel(Level.WARN);
-            logger.setAdditive(false);
-        }
-
-        try {
-            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-            botsApi.registerBot(new MyAmazingBot());
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
+//        Set<String> loggers = new HashSet<>(Arrays.asList("org.apache.http", "groovyx.net.http"));
+//
+//        for(String log:loggers) {
+//            Logger logger = (Logger) LoggerFactory.getLogger(log);
+//            logger.setLevel(Level.WARN);
+//            logger.setAdditive(false);
+//        }
+//
+//        try {
+//            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
+//            botsApi.registerBot(new MyAmazingBot());
+//        } catch (TelegramApiException e) {
+//            e.printStackTrace();
+//        }
 
         ElonTweetBot elonTweetBot = new ElonTweetBot(new TweetMachine(), new BinanceMachine());
         int counter = 0;
 
-        while(true) {
+        //while(true) {
             elonTweetBot.continuousElonLogic();
             TimeUnit.SECONDS.sleep(1);
 
@@ -64,43 +64,48 @@ public class ElonTweetBot {
                 System.out.println("ELONDOGE -> counter is 100");
                 counter = 0;
             }
-        }
+        //}
     }
 
     private void continuousElonLogic() throws Exception {
         Status mostRecentElonTweetStatus = tweetMachine.getMostRecentElonTweetStatus();
 
         if(mostRecentElonTweetStatus != null) {
-            String mostRecentElonTweet = mostRecentElonTweetStatus.getText();
-
-            if(mostRecentElonTweet != null) {
-                if(elonTweetContainsKeyword(mostRecentElonTweet) && !mostRecentElonTweet.equals(latestElonTweetWithKeyword)) {
-                    if(!aTradeHasBeenDone || thereIsSufficientTimeBetweenLastKeywordTweetAndCurrentOne(mostRecentElonTweetStatus)) {
-                        System.out.println("ELONDOGE -> new tweet with keyword identified. Tweet: " + mostRecentElonTweet);
-                        System.out.println("ELONDOGE -> placing market buy order");
-
-                        latestElonTweetWithKeyword = mostRecentElonTweet;
-                        NewOrderResponse marketOrderResponse = binanceMachine.placeDogeMarketBuyOrder();
-
-                        while(!marketOrderResponse.getStatus().equals(OrderStatus.FILLED)) {
-                            System.out.println("ELONDOGE -> waiting for fill of market order");
-                        }
-
-                        double priceOfMarketOrder = binanceMachine.getPriceOfLastTrade();
-                        System.out.println("ELONDOGE -> price of market buy order: " + priceOfMarketOrder);
-                        String priceToSell = getPriceToSell(priceOfMarketOrder);
-                        System.out.println("ELONDOGE -> price for limit sell order: " + priceToSell);
-                        System.out.println("ELONDOGE -> placing limit sell order");
-                        binanceMachine.placeDogeLimitSellOrder(String.valueOf(priceToSell));
-                        aTradeHasBeenDone = true;
-                    }
-                }
-            } else {
-                System.out.println("ELONDOGE -> mostRecentElonTweetText is null!");
-            }
-        } else {
-            System.out.println("ELONDOGE -> mostRecentElonTweetStatus is null!");
+            System.out.println(mostRecentElonTweetStatus.getText());
         }
+
+
+//        if(mostRecentElonTweetStatus != null) {
+//            String mostRecentElonTweet = mostRecentElonTweetStatus.getText();
+//
+//            if(mostRecentElonTweet != null) {
+//                if(elonTweetContainsKeyword(mostRecentElonTweet) && !mostRecentElonTweet.equals(latestElonTweetWithKeyword)) {
+//                    if(!aTradeHasBeenDone || thereIsSufficientTimeBetweenLastKeywordTweetAndCurrentOne(mostRecentElonTweetStatus)) {
+//                        System.out.println("ELONDOGE -> new tweet with keyword identified. Tweet: " + mostRecentElonTweet);
+//                        System.out.println("ELONDOGE -> placing market buy order");
+//
+//                        latestElonTweetWithKeyword = mostRecentElonTweet;
+//                        NewOrderResponse marketOrderResponse = binanceMachine.placeDogeMarketBuyOrder();
+//
+//                        while(!marketOrderResponse.getStatus().equals(OrderStatus.FILLED)) {
+//                            System.out.println("ELONDOGE -> waiting for fill of market order");
+//                        }
+//
+//                        double priceOfMarketOrder = binanceMachine.getPriceOfLastTrade();
+//                        System.out.println("ELONDOGE -> price of market buy order: " + priceOfMarketOrder);
+//                        String priceToSell = getPriceToSell(priceOfMarketOrder);
+//                        System.out.println("ELONDOGE -> price for limit sell order: " + priceToSell);
+//                        System.out.println("ELONDOGE -> placing limit sell order");
+//                        binanceMachine.placeDogeLimitSellOrder(String.valueOf(priceToSell));
+//                        aTradeHasBeenDone = true;
+//                    }
+//                }
+//            } else {
+//                System.out.println("ELONDOGE -> mostRecentElonTweetText is null!");
+//            }
+//        } else {
+//            System.out.println("ELONDOGE -> mostRecentElonTweetStatus is null!");
+//        }
     }
 
     private boolean elonTweetContainsKeyword(String latestElonTweet) {

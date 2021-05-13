@@ -21,11 +21,11 @@ public class MyAmazingBot extends TelegramLongPollingBot {
 
             if(messageText.toLowerCase().contains("eije") || messageText.toLowerCase().contains("leon")) {
                 if(Math.random() < 0.2) {
-                    botReturnMessageText = "EIJE!";
+                    botReturnMessageText = "eije...";
                 } else if(Math.random() < 0.4) {
-                    botReturnMessageText = "HMM!";
+                    botReturnMessageText = "hmm?";
                 } else if(Math.random() < 0.6) {
-                    botReturnMessageText = "WATTE!";
+                    botReturnMessageText = "watte?";
                 } else if(Math.random() < 0.8) {
                     botReturnMessageText = "Tzeije?!";
                 } else {

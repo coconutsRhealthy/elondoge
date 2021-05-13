@@ -62,10 +62,18 @@ public class TweetMachine {
         TwitterFactory factory = new TwitterFactory(cb.build());
         Twitter twitter = factory.getInstance();
 
-        Paging paging = new Paging(1, 1);
+        Paging paging = new Paging(1, 10);
 
         List<Status> elonTweets = twitter.getUserTimeline("elonmusk", paging).stream()
                 .collect(Collectors.toList());
+
+        //twitter.
+
+        List<String> elonTweetStrings = elonTweets.stream().map(status -> status.getText()).collect(Collectors.toList());
+
+        for(String tweetString : elonTweetStrings) {
+            System.out.println(tweetString);
+        }
 
         Status lastElonTweet;
 
