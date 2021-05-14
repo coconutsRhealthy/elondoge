@@ -1,6 +1,7 @@
 package com.lennart.binance;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by LennartMac on 12/05/2021.
@@ -33,6 +34,7 @@ public class BackTest {
 
         for(int i = startIndex; i < (startIndex + 499); i++) {
             coinsToBuy = momentum.getCoinsToBuy(pctChangeBase, 60);
+            coinsToBuy = coinsToBuy.stream().limit(4).collect(Collectors.toList());
 
             amountOfCoinsToBuyPerRound.add(coinsToBuy.size());
 
