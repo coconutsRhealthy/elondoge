@@ -18,8 +18,8 @@ public class Momentum {
         List<String> allCoinsSortedByPct = pctChangeForAllPairs.keySet().stream().collect(Collectors.toList());
         List<String> coinsToBuy = new ArrayList<>();
 
-        if(amountToInclude > allCoinsSortedByPct.size() -1) {
-            amountToInclude = allCoinsSortedByPct.size() -1;
+        if(amountToInclude > allCoinsSortedByPct.size()) {
+            amountToInclude = allCoinsSortedByPct.size();
         }
 
         for(int i = 0; i < amountToInclude; i++) {
@@ -29,7 +29,7 @@ public class Momentum {
 
             //nieuw: 1.004 -> 190 trades
 
-            if(pctChangeForAllPairs.get(allCoinsSortedByPct.get(i)) > 1.005) {
+            if(pctChangeForAllPairs.get(allCoinsSortedByPct.get(i)) > 1.004) {
                 coinsToBuy.add(allCoinsSortedByPct.get(i));
             }
         }
@@ -48,20 +48,18 @@ public class Momentum {
         return profitOfBoughtCoins;
     }
 
-    public Map<String, Double> getPercentChangeForAllPairs(int startIndex, int deltaIndex) {
+    public Map<String, Double> getPercentChangeForAllPairs(int startIndex, int deltaIndex, String type) {
         List<String> pairs = getAllBusdTradingPairs();
         Map<String, Double> pctChanges = new HashMap<>();
 
-        int counter = 0;
-
         for(String pair : pairs) {
-            List<Double> prices = historicalPrices.getRecentPrices(pair);
+            List<Double> buyPrices = historicalPrices.getRecentPrices(pair, "high", startIndex, deltaIndex);
+            List<Double> sellPrices = historicalPrices.getRecentPrices(pair, "low", startIndex, deltaIndex);
 
-            double lastPrice = prices.get(startIndex);
-            double secondLastPrice = prices.get(startIndex - deltaIndex);
-            double pctChange = lastPrice / secondLastPrice;
+            double priceAtWhichYouSell = sellPrices.get(startIndex);
+            double priceAtWhichYouBuy = buyPrices.get(startIndex - deltaIndex);
+            double pctChange = priceAtWhichYouSell / priceAtWhichYouBuy;
             pctChanges.put(pair, pctChange);
-            //System.out.println(counter++);
         }
 
         pctChanges = sortByValueHighToLow(pctChanges);

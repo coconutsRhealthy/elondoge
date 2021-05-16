@@ -19,12 +19,12 @@ public class BackTest {
         int intBankroll;
 
         List<String> coinsToBuy;
-        int startIndex = 1;
-        int deltaIndex = 1;
+        int startIndex = 2;
+        int deltaIndex = 2;
 
         Momentum momentum = new Momentum();
 
-        Map<String, Double> pctChangeBase = momentum.getPercentChangeForAllPairs(startIndex, deltaIndex);
+        Map<String, Double> pctChangeBase = momentum.getPercentChangeForAllPairs(startIndex, deltaIndex, "average");
         pctChangeBase = correctForBidAskSpread(pctChangeBase);
         pctChangeBase = correctProfitsForTradingCosts(pctChangeBase);
 
@@ -32,8 +32,10 @@ public class BackTest {
 
         List<Integer> amountOfCoinsToBuyPerRound = new ArrayList<>();
 
-        for(int i = startIndex; i < (startIndex + 499); i++) {
+        for(int i = (startIndex + 1); i < (startIndex + 498); i++) {
             coinsToBuy = momentum.getCoinsToBuy(pctChangeBase, 60);
+
+            //System.out.println("coinstobuy size: " + coinsToBuy.size());
             coinsToBuy = coinsToBuy.stream().limit(4).collect(Collectors.toList());
 
             amountOfCoinsToBuyPerRound.add(coinsToBuy.size());
@@ -46,7 +48,7 @@ public class BackTest {
 //                coinsToBuy = new ArrayList<>();
 //            }
 
-            Map<String, Double> pctChangeResult = momentum.getPercentChangeForAllPairs(i, deltaIndex);
+            Map<String, Double> pctChangeResult = momentum.getPercentChangeForAllPairs(i, deltaIndex, "low");
             pctChangeResult = correctForBidAskSpread(pctChangeResult);
             pctChangeResult = correctProfitsForTradingCosts(pctChangeResult);
             Map<String, Double> profits = momentum.getProfitOfBoughtCoins(coinsToBuy, pctChangeResult);
@@ -56,12 +58,12 @@ public class BackTest {
                 intBankroll = (int) bankroll;
                 System.out.println(intBankroll);
                 amountOfTrades = amountOfTrades + 2;
-                //System.out.println("pair: " + entry.getKey());
+                System.out.println("pair: " + entry.getKey());
             }
 
-            pctChangeBase = new HashMap<>();
-            pctChangeBase.putAll(pctChangeResult);
-            pctChangeBase = sortByValueHighToLow(pctChangeBase);
+            pctChangeBase = momentum.getPercentChangeForAllPairs(i, deltaIndex, "average");
+            pctChangeBase = correctForBidAskSpread(pctChangeBase);
+            pctChangeBase = correctProfitsForTradingCosts(pctChangeBase);
         }
 
         System.out.println("Final bankroll: " + bankroll);
@@ -71,7 +73,7 @@ public class BackTest {
 
         System.out.println();
         System.out.println("AMOUNT OF COINS:");
-        amountOfCoinsToBuyPerRound.forEach(amount -> System.out.println(amount));
+        //amountOfCoinsToBuyPerRound.forEach(amount -> System.out.println(amount));
     }
 
     private List<String> getRandomCoins(int amount) {

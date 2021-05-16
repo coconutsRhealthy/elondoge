@@ -2,9 +2,13 @@ package com.lennart.binance;
 
 import com.binance.api.client.BinanceApiClientFactory;
 import com.binance.api.client.BinanceApiRestClient;
+import com.binance.api.client.domain.OrderSide;
+import com.binance.api.client.domain.OrderType;
 import com.binance.api.client.domain.TimeInForce;
 import com.binance.api.client.domain.account.AssetBalance;
+import com.binance.api.client.domain.account.NewOrder;
 import com.binance.api.client.domain.account.NewOrderResponse;
+import com.binance.api.client.domain.account.Trade;
 import com.binance.api.client.domain.general.ExchangeInfo;
 import com.binance.api.client.domain.general.FilterType;
 import com.binance.api.client.domain.general.SymbolFilter;
@@ -46,9 +50,9 @@ public class Production {
         this.client = getBinanceApiClient();
     }
 
-    public static void main(String[] args) throws Exception {
-        new Production().continuousLogic();
-    }
+//    public static void main(String[] args) throws Exception {
+//        new Production().continuousLogic();
+//    }
 
     private void continuousLogic() throws Exception {
         int counter = 0;
@@ -96,11 +100,32 @@ public class Production {
         }
     }
 
+    private void continuousLogic2() {
+        //check which coins to buy
+        List<String> coinsToBuy = getCoinsToBuy();
+
+        //buy these coins market
+        for(String coin : coinsToBuy) {
+            if(getCurrentBusdBalance() > 26) {
+                buyNewPosition(coin);
+                //placeLimitSellOrderEIJE();
+            }
+        }
+
+        //place limit sell orders and stop loss orders
+
+
+    }
+
+    private double getCurrentBusdBalance() {
+        return 0;
+    }
+
     private List<String> getCoinsToBuy() {
         Momentum momentum = new Momentum();
         int startIndex = 499;
         int deltaIndex = 1;
-        Map<String, Double> pctChangeBase = momentum.getPercentChangeForAllPairs(startIndex, deltaIndex);
+        Map<String, Double> pctChangeBase = momentum.getPercentChangeForAllPairs(startIndex, deltaIndex, null);
         List<String> coinsToBuy = momentum.getCoinsToBuy(pctChangeBase, 60);
         List<String> coinsToBuy4max = coinsToBuy.stream().limit(4).collect(Collectors.toList());
         coinsToBuy4max = coinsToBuy4max.stream().map(pair -> pair.replace("BUSD", "")).collect(Collectors.toList());
@@ -121,16 +146,30 @@ public class Production {
         }
     }
 
+    private void placeLimitSellOrderEIJE(String coin, double amount, double limit) {
+        String minQtyToTrade = getMinQtyToTrade(coin, BASE_COIN);
+
+        if(positionCanBeTraded(minQtyToTrade, amount, coin + BASE_COIN, true)) {
+            String amountToTradeString = getAmountToTradeString2(amount, minQtyToTrade);
+            double priceOfLastTrade = getPriceOfLastTrade(coin + BASE_COIN);
+            placeLimitSellOrder(coin, BASE_COIN, amountToTradeString, String.valueOf(priceOfLastTrade * 1.004));
+        }
+    }
+
     private void buyNewPositions(List<String> coinsToBuy) {
         for(String coinToBuy : coinsToBuy) {
-            double currentAsk = getCurrentAskPrice(coinToBuy, BASE_COIN);
-            double amountToBuy = AMOUNT_TO_INVEST_PER_COIN / currentAsk;
-            String minQtyToTrade = getMinQtyToTrade(coinToBuy, BASE_COIN);
+            buyNewPosition(coinToBuy);
+        }
+    }
 
-            if(positionCanBeTraded(minQtyToTrade, amountToBuy, coinToBuy + BASE_COIN, false)) {
-                String amountToTradeString = getAmountToTradeString2(amountToBuy, minQtyToTrade);
-                placeMarketBuyOrder(coinToBuy, BASE_COIN, amountToTradeString);
-            }
+    private void buyNewPosition(String coinToBuy) {
+        double currentAsk = getCurrentAskPrice(coinToBuy, BASE_COIN);
+        double amountToBuy = AMOUNT_TO_INVEST_PER_COIN / currentAsk;
+        String minQtyToTrade = getMinQtyToTrade(coinToBuy, BASE_COIN);
+
+        if(positionCanBeTraded(minQtyToTrade, amountToBuy, coinToBuy + BASE_COIN, false)) {
+            String amountToTradeString = getAmountToTradeString2(amountToBuy, minQtyToTrade);
+            placeMarketBuyOrder(coinToBuy, BASE_COIN, amountToTradeString);
         }
     }
 
@@ -164,6 +203,16 @@ public class Production {
         String tradingPair = coinToSell + coinToReceive;
         System.out.println("Market Sell " + coinToSell + " Amount: " + amount);
         client.newOrder(marketSell(tradingPair, amount));
+    }
+
+    public void placeLimitSellOrder(String coinToSell, String coinToReceive, String amount, String limit) {
+        String tradingPair = coinToSell + coinToReceive;
+        client.newOrder(limitSell(tradingPair, TimeInForce.GTC, amount, limit));
+    }
+
+    private void placeStopLimitOrder(String tradingPair, String amount, String stopPrice, String limit) {
+        NewOrder order = new NewOrder(tradingPair, OrderSide.SELL, OrderType.STOP_LOSS_LIMIT, TimeInForce.GTC, amount, limit);
+        client.newOrder(order.stopPrice(stopPrice));
     }
 
     private boolean amountToSellIsAboveMinQty(String coinToSell, String coinToReceive, double amount) {
@@ -289,10 +338,22 @@ public class Production {
         return minQtyToTrade;
     }
 
+    public double getPriceOfLastTrade(String pair) {
+        double priceToReturn = 0;
+        List<Trade> allTrades = client.getMyTrades(pair);
+
+        if(!allTrades.isEmpty()) {
+            Trade lastTrade = allTrades.get(allTrades.size() - 1);
+            priceToReturn = Double.valueOf(lastTrade.getPrice());
+        }
+
+        return priceToReturn;
+    }
+
     private BinanceApiRestClient getBinanceApiClient() {
         BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(
-                "xxx",
-                "xxx");
+                "jeWCbhJx1Smghax75XupLI51BW1IRD4oJm7PeCBrQ7xz89hUQ4UjqVcq8EyOEBD6",
+                "yYGe5sFsHqZDhhg79LW3OhjOOZrhxWELO4vMLMfbtNYNU6XcyijQaCARzIUROuK7");
         return factory.newRestClient();
     }
 

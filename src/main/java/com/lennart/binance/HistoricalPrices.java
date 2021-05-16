@@ -30,11 +30,11 @@ public class HistoricalPrices {
     private BinanceApiRestClient getBinanceApiClient() {
         BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(
                 "zzz",
-                "zzz");
+                "zzd");
         return factory.newRestClient();
     }
 
-    public List<Double> getRecentPrices(String ticker) {
+    public List<Double> getRecentPrices(String ticker, String type, int startIndex, int deltaIndex) {
         List<Candlestick> candlesticks;
 
         if(allCandleSticks.get(ticker) != null) {
@@ -47,11 +47,23 @@ public class HistoricalPrices {
         List<Double> prices = new ArrayList<>();
 
         for(Candlestick stick : candlesticks) {
-            double high = Double.valueOf(stick.getHigh());
-            double low = Double.valueOf(stick.getLow());
-            double average = (high + low) / 2;
-            prices.add(average);
+            if(type.equals("low")) {
+                prices.add(Double.valueOf(stick.getLow()));
+            } else if(type.equals("high")) {
+                prices.add(Double.valueOf(stick.getHigh()));
+            } else {
+                double high = Double.valueOf(stick.getHigh());
+                double low = Double.valueOf(stick.getLow());
+                double average = (high + low) / 2;
+                prices.add(average);
+            }
         }
+
+        //long openTimeOfStartIndex = candlesticks.get(startIndex).getOpenTime();
+        //long openTimeOfStartIndexMinusDelta = candlesticks.get(startIndex - deltaIndex).getOpenTime();
+
+        //System.out.println("open time startindex: " + openTimeOfStartIndex);
+        //System.out.println("open time startindex minus delta: " + openTimeOfStartIndexMinusDelta);
 
         return prices;
     }
