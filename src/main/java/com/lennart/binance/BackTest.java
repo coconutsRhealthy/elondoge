@@ -10,9 +10,9 @@ public class BackTest {
 
     Map<String, Double> bidAskSpreadMap = getBidAskSpreadMap();
 
-    public static void main(String[] args) {
-        new BackTest().doTheBackTest();
-    }
+//    public static void main(String[] args) {
+//        new BackTest().doTheBackTest();
+//    }
 
     private void doTheBackTest() {
         double bankroll = 132;

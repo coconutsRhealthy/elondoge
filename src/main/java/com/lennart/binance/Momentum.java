@@ -10,9 +10,9 @@ public class Momentum {
 
     private HistoricalPrices historicalPrices = new HistoricalPrices();
 
-    public static void main(String[] args) {
-        //new Momentum().getBestPerformer();
-    }
+//    public static void main(String[] args) {
+//        //new Momentum().getBestPerformer();
+//    }
 
     public List<String> getCoinsToBuy(Map<String, Double> pctChangeForAllPairs, int amountToInclude) {
         List<String> allCoinsSortedByPct = pctChangeForAllPairs.keySet().stream().collect(Collectors.toList());

@@ -22,10 +22,10 @@ public class HistoricalPrices {
     }
 
 
-    public static void main(String[] args) {
-        //new HistoricalPrices().getRecentPrices("BCHBUSD");
-        new HistoricalPrices().testMethode();
-    }
+//    public static void main(String[] args) {
+//        //new HistoricalPrices().getRecentPrices("BCHBUSD");
+//        new HistoricalPrices().testMethode();
+//    }
 
     private BinanceApiRestClient getBinanceApiClient() {
         BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(

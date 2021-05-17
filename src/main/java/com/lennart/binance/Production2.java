@@ -78,26 +78,30 @@ public class Production2 {
     }
 
     public static void main(String[] args) {
+        //new Production2().continuous3();
         new Production2().continuous3();
     }
 
     private void continuous3() {
-        for(int i = 0; i < 50_000; i++) {
-            System.out.println(i);
+        for(int i = 0; i < 100_000_000; i++) {
+            //hier list met eligible coins initialiseren..
 
-            if(i % 50 == 0) {
-                moveMouseIfNeeded();
-            }
+            try {
+                if(timeIsGood(13)) {
+                    CoinIdentifier coinIdentifier = new CoinIdentifier();
+                    List<String> coinsToBuy = coinIdentifier.getCoinsToBuy(4, 13, 0.98);
 
-            if(timeIsGood(13)) {
-                CoinIdentifier coinIdentifier = new CoinIdentifier();
-                List<String> coinsToBuy = coinIdentifier.getCoinsToBuy(4, 13, 1.003);
-
-                for(String coin : coinsToBuy) {
-                    if(getCurrentBusdBalance() > 24) {
-                        tradeWrapper(coin);
+                    for(String coin : coinsToBuy) {
+                        if(getCurrentBusdBalance() > 24) {
+                            tradeWrapper(coin);
+                        }
                     }
                 }
+
+                //hier in de else de list met eligible coins herevalueren..
+            } catch (Exception e) {
+                System.out.println("BINANCE EXCEPTION ERROR");
+                e.printStackTrace();
             }
         }
     }
@@ -159,7 +163,7 @@ public class Production2 {
     }
 
     private String getSellLimit(double purchasePrice, String ticksize) {
-        double sellLimit = purchasePrice * 1.01;
+        double sellLimit = purchasePrice * 1.011;
         DecimalFormat formatter = new DecimalFormat(ticksize);
         String sellLimitString = formatter.format(sellLimit);
         System.out.println("Profit sell limit: " + sellLimitString);
@@ -353,8 +357,8 @@ public class Production2 {
 
 
     private void placeMarketSell() {
-        String tradingPair = "HEGICBUSD";
-        client.newOrder(marketSell("HEGICBUSD", "147.77"));
+        String tradingPair = "EURBUSD";
+        client.newOrder(marketSell("EURBUSD", "20.31"));
 
     }
 

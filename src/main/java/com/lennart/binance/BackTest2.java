@@ -19,9 +19,9 @@ public class BackTest2 {
         this.client = getBinanceApiClient();
     }
 
-    public static void main(String[] args) {
-        new BackTest2().overallTestMethod();
-    }
+//    public static void main(String[] args) {
+//        new BackTest2().overallTestMethod();
+//    }
 
     private void overallTestMethod() {
         List<Candlestick> allSticksForPair = getAllCandleSticksForPair("BTCBUSD");

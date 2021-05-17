@@ -10,8 +10,8 @@ public class BinanceClientFactory {
 
     public static BinanceApiRestClient getBinanceApiClient() {
         BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(
-                "jeWCbhJx1Smghax75XupLI51BW1IRD4oJm7PeCBrQ7xz89hUQ4UjqVcq8EyOEBD6",
-                "yYGe5sFsHqZDhhg79LW3OhjOOZrhxWELO4vMLMfbtNYNU6XcyijQaCARzIUROuK7");
+                "zzz",
+                "zzz");
         return factory.newRestClient();
     }
 }

@@ -36,36 +36,36 @@ public class ElonTweetBot {
         this.binanceMachine = binanceMachine;
     }
 
-    public static void main(String[] args) throws Exception {
-//        Set<String> loggers = new HashSet<>(Arrays.asList("org.apache.http", "groovyx.net.http"));
+//    public static void main(String[] args) throws Exception {
+////        Set<String> loggers = new HashSet<>(Arrays.asList("org.apache.http", "groovyx.net.http"));
+////
+////        for(String log:loggers) {
+////            Logger logger = (Logger) LoggerFactory.getLogger(log);
+////            logger.setLevel(Level.WARN);
+////            logger.setAdditive(false);
+////        }
+////
+////        try {
+////            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
+////            botsApi.registerBot(new MyAmazingBot());
+////        } catch (TelegramApiException e) {
+////            e.printStackTrace();
+////        }
 //
-//        for(String log:loggers) {
-//            Logger logger = (Logger) LoggerFactory.getLogger(log);
-//            logger.setLevel(Level.WARN);
-//            logger.setAdditive(false);
-//        }
+//        ElonTweetBot elonTweetBot = new ElonTweetBot(new TweetMachine(), new BinanceMachine());
+//        int counter = 0;
 //
-//        try {
-//            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-//            botsApi.registerBot(new MyAmazingBot());
-//        } catch (TelegramApiException e) {
-//            e.printStackTrace();
-//        }
-
-        ElonTweetBot elonTweetBot = new ElonTweetBot(new TweetMachine(), new BinanceMachine());
-        int counter = 0;
-
-        //while(true) {
-            elonTweetBot.continuousElonLogic();
-            TimeUnit.SECONDS.sleep(1);
-
-            counter++;
-            if(counter == 100) {
-                System.out.println("ELONDOGE -> counter is 100");
-                counter = 0;
-            }
-        //}
-    }
+//        //while(true) {
+//            elonTweetBot.continuousElonLogic();
+//            TimeUnit.SECONDS.sleep(1);
+//
+//            counter++;
+//            if(counter == 100) {
+//                System.out.println("ELONDOGE -> counter is 100");
+//                counter = 0;
+//            }
+//        //}
+//    }
 
     private void continuousElonLogic() throws Exception {
         Status mostRecentElonTweetStatus = tweetMachine.getMostRecentElonTweetStatus();

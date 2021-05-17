@@ -62,9 +62,9 @@ public class BinanceMachine {
         return priceToReturn;
     }
 
-    public static void main(String[] args) {
-        new BinanceMachine().fftesten();
-    }
+//    public static void main(String[] args) {
+//        new BinanceMachine().fftesten();
+//    }
 
     private void fftesten() {
         //List<AssetBalance> eije = client.getAccount().getBalances();

@@ -34,11 +34,11 @@ public class CoinIdentifier {
 //        System.out.println(secondsSince);
     }
 
-    public List<String> getCoinsToBuy(int maxNumberOfCoins, int maxSecondsSincsLastObservation, double minimumProfit) {
+    public List<String> getCoinsToBuy(int maxNumberOfCoins, int maxSecondsSincsLastObservation, double minimumLoss) {
         List<String> coinsToBuy = new ArrayList<>();
         Map<String, Double> profits = new HashMap<>();
         BinanceApiRestClient client = BinanceClientFactory.getBinanceApiClient();
-        List<String> pairs = getAllBusdTradingPairs();
+        List<String> pairs = new BigBackTest().getAttractiveCoins();
 
         Collections.shuffle(pairs);
 
@@ -52,13 +52,13 @@ public class CoinIdentifier {
             if(seconds < maxSecondsSincsLastObservation) {
                 double profit = getReturn(newestStick, getSecondNewestCompletedCandlestick(allSticks));
 
-                if(profit > minimumProfit) {
+                if(profit < minimumLoss) {
                     profits.put(pair, profit);
                 }
             }
         }
 
-        profits = sortByValueHighToLow(profits);
+        profits = sortByValueLowToHigh(profits);
 
         if(profits.size() > maxNumberOfCoins) {
             int counter = 0;
@@ -93,12 +93,12 @@ public class CoinIdentifier {
     }
 
     public List<Candlestick> getAllCandleSticksForPair(String pair, BinanceApiRestClient client) {
-        return client.getCandlestickBars(pair, CandlestickInterval.ONE_MINUTE);
+        return client.getCandlestickBars(pair, CandlestickInterval.FIVE_MINUTES);
     }
 
-    public static void main(String[] args) {
-        new CoinIdentifier().efkesTestje();
-    }
+//    public static void main(String[] args) {
+//        new CoinIdentifier().efkesTestje();
+//    }
 
     private void efkesTestje() {
         List<Candlestick> allSticks = getAllCandleSticksForPair("BTCBUSD", BinanceClientFactory.getBinanceApiClient());
@@ -158,42 +158,231 @@ public class CoinIdentifier {
     public List<String> getAllBusdTradingPairs() {
         List<String> busdTradingPairs = new ArrayList<>();
 
+//        busdTradingPairs.add("1INCHBUSD");
+//        busdTradingPairs.add("ADABUSD");
+//        busdTradingPairs.add("AUDBUSD");
+//        busdTradingPairs.add("BCHBUSD");
+//        busdTradingPairs.add("BNBBUSD");
+//        busdTradingPairs.add("BTCBUSD");
+//        busdTradingPairs.add("BTTBUSD");
+//        busdTradingPairs.add("BUSDBIDR");
+//        busdTradingPairs.add("BUSDBRL");
+//        busdTradingPairs.add("BUSDDAI");
+//        busdTradingPairs.add("BUSDRUB");
+//        busdTradingPairs.add("CAKEBUSD");
+//        busdTradingPairs.add("COMPBUSD");
+//        busdTradingPairs.add("DOGEBUSD");
+//        busdTradingPairs.add("DOTBUSD");
+//        busdTradingPairs.add("ENJBUSD");
+//        busdTradingPairs.add("ETCBUSD");
+//        busdTradingPairs.add("ETHBUSD");
+//        busdTradingPairs.add("EURBUSD");
+//        busdTradingPairs.add("FILBUSD");
+//        busdTradingPairs.add("FXSBUSD");
+//        busdTradingPairs.add("GBPBUSD");
+//        busdTradingPairs.add("HBARBUSD");
+//        busdTradingPairs.add("HEGICBUSD");
+//        busdTradingPairs.add("IQBUSD");
+//        busdTradingPairs.add("LTCBUSD");
+//        busdTradingPairs.add("LUNABUSD");
+//        busdTradingPairs.add("PAXBUSD");
+//        busdTradingPairs.add("REEFBUSD");
+//        busdTradingPairs.add("SHIBBUSD");
+//        busdTradingPairs.add("SUSHIBUSD");
+//        busdTradingPairs.add("TLMBUSD");
+//        busdTradingPairs.add("TUSDBUSD");
+//        busdTradingPairs.add("USDCBUSD");
+//        busdTradingPairs.add("XRPBUSD");
+//        busdTradingPairs.add("XVGBUSD");
+
+
+
+
+
+
+        //////
+
         busdTradingPairs.add("1INCHBUSD");
+        busdTradingPairs.add("AAVEBUSD");
+        busdTradingPairs.add("ACMBUSD");
         busdTradingPairs.add("ADABUSD");
+        busdTradingPairs.add("AERGOBUSD");
+        busdTradingPairs.add("ALGOBUSD");
+        busdTradingPairs.add("ALICEBUSD");
+        busdTradingPairs.add("ALPHABUSD");
+        busdTradingPairs.add("ANTBUSD");
+        busdTradingPairs.add("ATOMBUSD");
+        busdTradingPairs.add("AUCTIONBUSD");
         busdTradingPairs.add("AUDBUSD");
+        busdTradingPairs.add("AUDIOBUSD");
+        busdTradingPairs.add("AUTOBUSD");
+        busdTradingPairs.add("AVABUSD");
+        busdTradingPairs.add("AVAXBUSD");
+        busdTradingPairs.add("AXSBUSD");
+        busdTradingPairs.add("BADGERBUSD");
+        busdTradingPairs.add("BAKEBUSD");
+        busdTradingPairs.add("BALBUSD");
+        busdTradingPairs.add("BANDBUSD");
+        busdTradingPairs.add("BARBUSD");
+        busdTradingPairs.add("BATBUSD");
+        busdTradingPairs.add("BCHABUSD");
         busdTradingPairs.add("BCHBUSD");
+        busdTradingPairs.add("BELBUSD");
+        busdTradingPairs.add("BIFIBUSD");
         busdTradingPairs.add("BNBBUSD");
+        //busdTradingPairs.add("BNBUSDC");
+        //busdTradingPairs.add("BNBUSDT");
+        busdTradingPairs.add("BNTBUSD");
         busdTradingPairs.add("BTCBUSD");
+        busdTradingPairs.add("BTCSTBUSD");
+        busdTradingPairs.add("BTGBUSD");
         busdTradingPairs.add("BTTBUSD");
+        busdTradingPairs.add("BURGERBUSD");
         busdTradingPairs.add("BUSDBIDR");
         busdTradingPairs.add("BUSDBRL");
+        busdTradingPairs.add("BUSDBVND");
         busdTradingPairs.add("BUSDDAI");
         busdTradingPairs.add("BUSDRUB");
+        //busdTradingPairs.add("BUSDTRY");
+        //busdTradingPairs.add("BUSDUSDT");
+        busdTradingPairs.add("BUSDVAI");
+        busdTradingPairs.add("BUSDZAR");
+        busdTradingPairs.add("BZRXBUSD");
         busdTradingPairs.add("CAKEBUSD");
+        busdTradingPairs.add("CFXBUSD");
+        busdTradingPairs.add("CHZBUSD");
+        busdTradingPairs.add("CKBBUSD");
+        //busdTradingPairs.add("CKBUSDT");
         busdTradingPairs.add("COMPBUSD");
+        busdTradingPairs.add("COVERBUSD");
+        busdTradingPairs.add("CREAMBUSD");
+        busdTradingPairs.add("CRVBUSD");
+        busdTradingPairs.add("CTKBUSD");
+        busdTradingPairs.add("CTSIBUSD");
+        busdTradingPairs.add("CVPBUSD");
+        busdTradingPairs.add("DASHBUSD");
+        busdTradingPairs.add("DATABUSD");
+        busdTradingPairs.add("DEGOBUSD");
+        busdTradingPairs.add("DEXEBUSD");
+        busdTradingPairs.add("DFBUSD");
+        busdTradingPairs.add("DGBBUSD");
+        //busdTradingPairs.add("DGBUSDT");
+        busdTradingPairs.add("DIABUSD");
+        busdTradingPairs.add("DNTBUSD");
+        busdTradingPairs.add("DODOBUSD");
         busdTradingPairs.add("DOGEBUSD");
         busdTradingPairs.add("DOTBUSD");
+        busdTradingPairs.add("EGLDBUSD");
         busdTradingPairs.add("ENJBUSD");
+        busdTradingPairs.add("EOSBUSD");
+        busdTradingPairs.add("EPSBUSD");
         busdTradingPairs.add("ETCBUSD");
         busdTradingPairs.add("ETHBUSD");
         busdTradingPairs.add("EURBUSD");
         busdTradingPairs.add("FILBUSD");
+        busdTradingPairs.add("FIOBUSD");
+        busdTradingPairs.add("FISBUSD");
+        busdTradingPairs.add("FLMBUSD");
+        busdTradingPairs.add("FORBUSD");
+        busdTradingPairs.add("FORTHBUSD");
+        busdTradingPairs.add("FRONTBUSD");
         busdTradingPairs.add("FXSBUSD");
         busdTradingPairs.add("GBPBUSD");
+        busdTradingPairs.add("GHSTBUSD");
+        busdTradingPairs.add("GRTBUSD");
+        busdTradingPairs.add("HARDBUSD");
         busdTradingPairs.add("HBARBUSD");
         busdTradingPairs.add("HEGICBUSD");
+        busdTradingPairs.add("HOTBUSD");
+        busdTradingPairs.add("ICPBUSD");
+        busdTradingPairs.add("ICXBUSD");
+        busdTradingPairs.add("IDEXBUSD");
+        busdTradingPairs.add("INJBUSD");
+        busdTradingPairs.add("IOSTBUSD");
+        busdTradingPairs.add("IOTABUSD");
         busdTradingPairs.add("IQBUSD");
+        busdTradingPairs.add("JSTBUSD");
+        busdTradingPairs.add("JUVBUSD");
+        busdTradingPairs.add("KNCBUSD");
+        busdTradingPairs.add("KP3RBUSD");
+        busdTradingPairs.add("KSMBUSD");
+        busdTradingPairs.add("LINABUSD");
+        busdTradingPairs.add("LINKBUSD");
+        busdTradingPairs.add("LITBUSD");
+        busdTradingPairs.add("LRCBUSD");
         busdTradingPairs.add("LTCBUSD");
         busdTradingPairs.add("LUNABUSD");
+        busdTradingPairs.add("MANABUSD");
+        busdTradingPairs.add("MATICBUSD");
+        busdTradingPairs.add("MIRBUSD");
+        busdTradingPairs.add("MKRBUSD");
+        busdTradingPairs.add("NANOBUSD");
+        busdTradingPairs.add("NEARBUSD");
+        busdTradingPairs.add("NEOBUSD");
+        busdTradingPairs.add("NMRBUSD");
+        busdTradingPairs.add("OCEANBUSD");
+        busdTradingPairs.add("OMBUSD");
+        busdTradingPairs.add("OMGBUSD");
+        busdTradingPairs.add("ONEBUSD");
+        busdTradingPairs.add("ONTBUSD");
         busdTradingPairs.add("PAXBUSD");
+        busdTradingPairs.add("PERPBUSD");
+        busdTradingPairs.add("PHABUSD");
+        busdTradingPairs.add("PONDBUSD");
+        busdTradingPairs.add("PROMBUSD");
+        busdTradingPairs.add("PSGBUSD");
+        busdTradingPairs.add("QTUMBUSD");
+        busdTradingPairs.add("RAMPBUSD");
         busdTradingPairs.add("REEFBUSD");
+        busdTradingPairs.add("ROSEBUSD");
+        busdTradingPairs.add("RSRBUSD");
+        busdTradingPairs.add("RUNEBUSD");
+        busdTradingPairs.add("RVNBUSD");
+        busdTradingPairs.add("SANDBUSD");
+        busdTradingPairs.add("SFPBUSD");
         busdTradingPairs.add("SHIBBUSD");
+        //busdTradingPairs.add("SHIBUSDT");
+        busdTradingPairs.add("SKLBUSD");
+        busdTradingPairs.add("SLPBUSD");
+        busdTradingPairs.add("SNXBUSD");
+        busdTradingPairs.add("SOLBUSD");
+        busdTradingPairs.add("SRMBUSD");
+        busdTradingPairs.add("STRAXBUSD");
+        busdTradingPairs.add("SUPERBUSD");
         busdTradingPairs.add("SUSHIBUSD");
+        busdTradingPairs.add("SWRVBUSD");
+        busdTradingPairs.add("SXPBUSD");
+        busdTradingPairs.add("SYSBUSD");
+        busdTradingPairs.add("TKOBUSD");
         busdTradingPairs.add("TLMBUSD");
+        busdTradingPairs.add("TOMOBUSD");
+        busdTradingPairs.add("TRBBUSD");
+        //busdTradingPairs.add("TRBUSDT");
+        busdTradingPairs.add("TRUBUSD");
+        busdTradingPairs.add("TRXBUSD");
         busdTradingPairs.add("TUSDBUSD");
+        busdTradingPairs.add("TVKBUSD");
+        busdTradingPairs.add("TWTBUSD");
+        busdTradingPairs.add("UFTBUSD");
+        busdTradingPairs.add("UNFIBUSD");
+        busdTradingPairs.add("UNIBUSD");
         busdTradingPairs.add("USDCBUSD");
+        busdTradingPairs.add("VETBUSD");
+        busdTradingPairs.add("VIDTBUSD");
+        busdTradingPairs.add("WAVESBUSD");
+        busdTradingPairs.add("WINGBUSD");
+        busdTradingPairs.add("WRXBUSD");
+        busdTradingPairs.add("XLMBUSD");
+        busdTradingPairs.add("XMRBUSD");
         busdTradingPairs.add("XRPBUSD");
+        busdTradingPairs.add("XTZBUSD");
         busdTradingPairs.add("XVGBUSD");
+        busdTradingPairs.add("XVSBUSD");
+        busdTradingPairs.add("YFIBUSD");
+        busdTradingPairs.add("YFIIBUSD");
+        busdTradingPairs.add("ZECBUSD");
+        busdTradingPairs.add("ZILBUSD");
+        busdTradingPairs.add("ZRXBUSD");
 
         return busdTradingPairs;
     }
@@ -204,6 +393,22 @@ public class CoinIdentifier {
             @Override
             public int compare(Map.Entry<K, V> o1, Map.Entry<K, V> o2) {
                 return (o2.getValue() ).compareTo( o1.getValue());
+            }
+        });
+
+        Map<K, V> result = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : list) {
+            result.put(entry.getKey(), entry.getValue());
+        }
+        return result;
+    }
+
+    private <K, V extends Comparable<? super V>> Map<K, V> sortByValueLowToHigh(Map<K, V> map) {
+        List<Map.Entry<K, V>> list = new LinkedList<>( map.entrySet() );
+        Collections.sort(list, new Comparator<Map.Entry<K, V>>() {
+            @Override
+            public int compare(Map.Entry<K, V> o1, Map.Entry<K, V> o2) {
+                return (o1.getValue() ).compareTo( o2.getValue());
             }
         });
 
