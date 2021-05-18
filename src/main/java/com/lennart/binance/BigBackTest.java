@@ -5,6 +5,7 @@ import com.binance.api.client.domain.market.Candlestick;
 import com.binance.api.client.domain.market.CandlestickInterval;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by LennartMac on 16/05/2021.
@@ -21,9 +22,7 @@ public class BigBackTest {
         new BigBackTest().machineLearning();
     }
 
-    private void testMethodEvaluateMon17May() {
-        double bankroll = 125;
-        List<String> results = new ArrayList<>();
+    public List<String> getAttractiveCoinsDynamically() {
         List<String> allPairs = new CoinIdentifier().getAllBusdTradingPairs();
 
         Map<String, Double> amountNeededProfitMap = new HashMap<>();
@@ -79,11 +78,13 @@ public class BigBackTest {
         }
 
         ratioMap = sortByValueHighToLow(ratioMap);
+        ratioMap = ratioMap.entrySet().stream()
+                .filter(entry -> entry.getValue() >= 0.8)
+                .collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
 
-        printMap(ratioMap);
-
-
-        //System.out.println("wacht");
+        List<String> attractiveCoins = ratioMap.keySet().stream().collect(Collectors.toList());
+        Collections.sort(attractiveCoins);
+        return attractiveCoins;
     }
 
     private void printMap(Map<String, Double> map) {
@@ -98,7 +99,7 @@ public class BigBackTest {
 
     private double getBankrollResultGivenInput(double bankroll) {
         List<String> results = new ArrayList<>();
-        List<String> allPairs = getAttractiveCoins();
+        List<String> allPairs = getAttractiveCoinsDynamically();
 
         for(String pair : allPairs) {
             System.out.println(pair);
@@ -120,13 +121,13 @@ public class BigBackTest {
         }
 
         Collections.sort(results);
-        //System.out.println();
-        //System.out.println();
-        //System.out.println("Profit amount: " + Collections.frequency(results, "profit"));
-        //System.out.println("Loss amount: " + Collections.frequency(results, "loss"));
-        //System.out.println("Undeciced amount: " + Collections.frequency(results, "undecided"));
-        //System.out.println("Total: " + results.size());
-        //System.out.println("bankroll: " + bankroll);
+        System.out.println();
+        System.out.println();
+        System.out.println("Profit amount: " + Collections.frequency(results, "profit"));
+        System.out.println("Loss amount: " + Collections.frequency(results, "loss"));
+        System.out.println("Undeciced amount: " + Collections.frequency(results, "undecided"));
+        System.out.println("Total: " + results.size());
+        System.out.println("bankroll: " + bankroll);
 
         return bankroll;
     }
@@ -261,10 +262,7 @@ public class BigBackTest {
         } else if(result.equals("loss")) {
             updatedBankroll = currBankroll + (25 * (takeLoss - 1));
         } else {
-            //updatedBankroll = updatedBankroll -
-            //updatedBankroll = currBankroll;
             updatedBankroll = currBankroll + (25 * (takeLoss - 1));
-            //updatedBankroll = currBankroll - 25;
         }
 
         return updatedBankroll;

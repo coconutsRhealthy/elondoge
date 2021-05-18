@@ -34,11 +34,11 @@ public class CoinIdentifier {
 //        System.out.println(secondsSince);
     }
 
-    public List<String> getCoinsToBuy(int maxNumberOfCoins, int maxSecondsSincsLastObservation, double minimumLoss) {
+    public List<String> getCoinsToBuy(List<String> pairs, int maxNumberOfCoins, int maxSecondsSincsLastObservation,
+                                      double minimumLoss) {
         List<String> coinsToBuy = new ArrayList<>();
         Map<String, Double> profits = new HashMap<>();
         BinanceApiRestClient client = BinanceClientFactory.getBinanceApiClient();
-        List<String> pairs = new BigBackTest().getAttractiveCoins();
 
         Collections.shuffle(pairs);
 

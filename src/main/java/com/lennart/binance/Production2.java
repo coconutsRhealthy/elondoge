@@ -6,6 +6,7 @@ import com.binance.api.client.domain.OrderType;
 import com.binance.api.client.domain.TimeInForce;
 import com.binance.api.client.domain.account.AssetBalance;
 import com.binance.api.client.domain.account.NewOrder;
+import com.binance.api.client.domain.account.NewOrderResponse;
 import com.binance.api.client.domain.account.Trade;
 import com.binance.api.client.domain.general.ExchangeInfo;
 import com.binance.api.client.domain.general.FilterType;
@@ -18,7 +19,9 @@ import com.binance.api.client.domain.market.OrderBookEntry;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.text.DecimalFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.binance.api.client.domain.account.NewOrder.*;
 
@@ -68,7 +71,7 @@ public class Production2 {
 
     private void continuous() {
         CoinIdentifier coinIdentifier = new CoinIdentifier();
-        List<String> coinsToBuy = coinIdentifier.getCoinsToBuy(4, 13, 1.004);
+        List<String> coinsToBuy = coinIdentifier.getCoinsToBuy(null, 4, 13, 1.004);
 
         for(String coin : coinsToBuy) {
             if(getCurrentBusdBalance() > 24) {
@@ -83,13 +86,16 @@ public class Production2 {
     }
 
     private void continuous3() {
-        for(int i = 0; i < 100_000_000; i++) {
-            //hier list met eligible coins initialiseren..
+        long timeIsGoodTime = 0;
+        long attractiveCoinRefreshTime = new Date().getTime();
+        List<String> attractiveCoins = new BigBackTest().getAttractiveCoinsDynamically();
 
+        for(int i = 0; i < 100_000_000; i++) {
             try {
-                if(timeIsGood(13)) {
+                if(enoughTimeSincePrev(timeIsGoodTime) && timeIsGood(13)) {
+                    timeIsGoodTime = new Date().getTime();
                     CoinIdentifier coinIdentifier = new CoinIdentifier();
-                    List<String> coinsToBuy = coinIdentifier.getCoinsToBuy(4, 13, 0.98);
+                    List<String> coinsToBuy = coinIdentifier.getCoinsToBuy(attractiveCoins, 4, 13, 0.98);
 
                     for(String coin : coinsToBuy) {
                         if(getCurrentBusdBalance() > 24) {
@@ -98,12 +104,29 @@ public class Production2 {
                     }
                 }
 
-                //hier in de else de list met eligible coins herevalueren..
+                if(new Date().getTime() > attractiveCoinRefreshTime + 3_600_000) {
+                    System.out.println("Gonna refresh attractive coins. Time: " + new Date().getTime() +
+                            " Old size: " + attractiveCoins.size());
+                    attractiveCoins = new BigBackTest().getAttractiveCoinsDynamically();
+                    System.out.println("New attractive coins size: " + attractiveCoins.size());
+                    attractiveCoinRefreshTime = new Date().getTime();
+                }
             } catch (Exception e) {
                 System.out.println("BINANCE EXCEPTION ERROR");
                 e.printStackTrace();
             }
         }
+    }
+
+    private boolean enoughTimeSincePrev(long prevTime) {
+        long currTime = new Date().getTime();
+        long threeMinutes = 1000 * 180;
+
+        if(currTime > (prevTime + threeMinutes)) {
+            return true;
+        }
+
+        return false;
     }
 
     private void continuous2() {
@@ -150,8 +173,8 @@ public class Production2 {
             String amountToBuyString = getAmountToTradeString(amountToBuy, minQtyToTrade);
             System.out.println("amount to buy: " + amountToBuyString);
             placeMarketBuyOrder(coinToTrade, BASE_COIN, amountToBuyString);
-            double buyPrice = getPriceOfLastTrade(coinToTrade + BASE_COIN);
-            System.out.println("buyprice: " + buyPrice);
+            double buyPrice = getPriceOfLastBuyTrade(coinToTrade + BASE_COIN);
+            System.out.println("buyprice via last trade: " + buyPrice);
             double position = getPosition(coinToTrade);
             String amountToSellString = getAmountToTradeString(position, minQtyToTrade);
             System.out.println("amount to sell: " + amountToBuyString);
@@ -202,7 +225,8 @@ public class Production2 {
     public void placeMarketBuyOrder(String coinToBuy, String coinToSell, String amount) {
         String tradingPair = coinToBuy + coinToSell;
         System.out.println("Market Buy order: " + coinToBuy + " Amount: " + amount);
-        client.newOrder(marketBuy(tradingPair, amount));
+        NewOrderResponse marketBuyOrder = client.newOrder(marketBuy(tradingPair, amount));
+        System.out.println("Buy price from order response: " + marketBuyOrder.getPrice());
     }
 
     public void placeLimitSellOrder(String coinToSell, String coinToReceive, String amount, String limit) {
@@ -224,9 +248,10 @@ public class Production2 {
         client.newOcoOrder(ocoSell);
     }
 
-    private double getPriceOfLastTrade(String pair) {
+    private double getPriceOfLastBuyTrade(String pair) {
         double priceToReturn = 0;
         List<Trade> allTrades = client.getMyTrades(pair);
+        allTrades = allTrades.stream().filter(trade -> trade.isBuyer()).collect(Collectors.toList());
 
         if(!allTrades.isEmpty()) {
             Trade lastTrade = allTrades.get(allTrades.size() - 1);
