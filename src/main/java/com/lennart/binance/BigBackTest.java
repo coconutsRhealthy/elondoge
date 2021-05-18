@@ -11,14 +11,14 @@ import java.util.*;
  */
 public class BigBackTest {
 
-    private final double BASE_NEEDED_PROFIT = 0.98;
-    private final double TAKE_PROFIT = 1.011;
-    private final double TAKE_LOSS = 0.95;
+    private double baseNeededProfit = 0.98;
+    private double takeProfit = 1.011;
+    private double takeLoss = 0.95;
 
     private Map<String, List<Candlestick>> allSticksMap = new HashMap<>();
 
     public static void main(String[] args) {
-        new BigBackTest().testMethod();
+        new BigBackTest().machineLearning();
     }
 
     private void testMethodEvaluateMon17May() {
@@ -36,7 +36,7 @@ public class BigBackTest {
             for(int i = 1; i < (allSticks.size() - 1); i++) {
                 double profit = getProfit(allSticks.get(i - 1), allSticks.get(i));
 
-                if(profit < BASE_NEEDED_PROFIT) {
+                if(profit < baseNeededProfit) {
                     if(amountNeededProfitMap.get(pair) == null) {
                         amountNeededProfitMap.put(pair, 1.0);
                     } else {
@@ -96,10 +96,8 @@ public class BigBackTest {
         //map.entrySet().stream().forEach(entry -> System.out.println("busdTradingPairs.add(\"" + entry.getKey() + "\");"));
     }
 
-    private void testMethod() {
-        double bankroll = 125;
+    private double getBankrollResultGivenInput(double bankroll) {
         List<String> results = new ArrayList<>();
-        //List<String> allPairs = new CoinIdentifier().getAllBusdTradingPairs();
         List<String> allPairs = getAttractiveCoins();
 
         for(String pair : allPairs) {
@@ -109,7 +107,7 @@ public class BigBackTest {
             for(int i = 1; i < (allSticks.size() - 1); i++) {
                 double profit = getProfit(allSticks.get(i - 1), allSticks.get(i));
 
-                if(profit < BASE_NEEDED_PROFIT) {
+                if(profit < baseNeededProfit) {
                     double purchasePrice = determinePurchasePrice(allSticks.get(i + 1));
                     double takeProfitLimit = determineProfitSellPrice(purchasePrice);
                     double takeLossLimit = determineLossSellPrice(purchasePrice);
@@ -122,13 +120,74 @@ public class BigBackTest {
         }
 
         Collections.sort(results);
-        System.out.println();
-        System.out.println();
-        System.out.println("Profit amount: " + Collections.frequency(results, "profit"));
-        System.out.println("Loss amount: " + Collections.frequency(results, "loss"));
-        System.out.println("Undeciced amount: " + Collections.frequency(results, "undecided"));
-        System.out.println("Total: " + results.size());
-        System.out.println("bankroll: " + bankroll);
+        //System.out.println();
+        //System.out.println();
+        //System.out.println("Profit amount: " + Collections.frequency(results, "profit"));
+        //System.out.println("Loss amount: " + Collections.frequency(results, "loss"));
+        //System.out.println("Undeciced amount: " + Collections.frequency(results, "undecided"));
+        //System.out.println("Total: " + results.size());
+        //System.out.println("bankroll: " + bankroll);
+
+        return bankroll;
+    }
+
+    private void machineLearning() {
+        Map<List<Double>, Double> comboProfitMap = new HashMap<>();
+
+        List<Double> baseNeededProfitList = getBaseNeededProfitList();
+        List<Double> takeProfitList = getTakeProfitList();
+        List<Double> takeLossList = getTakeLossList();
+
+        for(Double a : baseNeededProfitList) {
+            for(Double b : takeProfitList) {
+                for(Double c : takeLossList) {
+                    baseNeededProfit = a;
+                    takeProfit = b;
+                    takeLoss = c;
+
+                    double profit = getBankrollResultGivenInput(125);
+                    comboProfitMap.put(Arrays.asList(baseNeededProfit,  takeProfit, takeLoss), profit);
+                }
+            }
+        }
+
+        comboProfitMap = sortByValueHighToLow(comboProfitMap);
+
+        System.out.println("wacht");
+    }
+
+    private List<Double> getBaseNeededProfitList() {
+        List<Double> baseNeededProfitList = new ArrayList<>();
+
+        for(double d = 0.95; d < 1; d = d + 0.025) {
+            baseNeededProfitList.add(d);
+        }
+
+        return baseNeededProfitList;
+    }
+
+    private List<Double> getTakeProfitList() {
+        List<Double> takeProfitList = new ArrayList<>();
+
+//        takeProfitList.add(1.011);
+//        takeProfitList.add(1.05);
+//        takeProfitList.add(2.00);
+
+        for(double d = 1; d <= 2; d = d + 0.1) {
+            takeProfitList.add(d);
+        }
+
+        return takeProfitList;
+    }
+
+    private List<Double> getTakeLossList() {
+        List<Double> takeLossList = new ArrayList<>();
+
+        takeLossList.add(0.95);
+        takeLossList.add(0.96);
+        takeLossList.add(0.97);
+
+        return takeLossList;
     }
 
     private double getProfit(Candlestick prev, Candlestick curr) {
@@ -141,11 +200,11 @@ public class BigBackTest {
     }
 
     private double determineProfitSellPrice(double purchasePrice) {
-        return purchasePrice * TAKE_PROFIT;
+        return purchasePrice * takeProfit;
     }
 
     private double determineLossSellPrice(double purchasePrice) {
-        return  purchasePrice * TAKE_LOSS;
+        return  purchasePrice * takeLoss;
     }
 
     private List<Candlestick> getRemainderOfStickList(List<Candlestick> allSticks, int indexOfBuyCandle) {
@@ -161,9 +220,16 @@ public class BigBackTest {
     }
 
     private List<Candlestick> getAllCandleSticksForPair(String pair, BinanceApiRestClient client) {
-        //List<Candlestick> sticks =
+        List<Candlestick> allStickForPair;
 
-        return client.getCandlestickBars(pair, CandlestickInterval.FIVE_MINUTES);
+        if(allSticksMap.get(pair) == null) {
+            allStickForPair = client.getCandlestickBars(pair, CandlestickInterval.FIVE_MINUTES);
+            allSticksMap.put(pair, allStickForPair);
+        } else {
+            allStickForPair = allSticksMap.get(pair);
+        }
+
+        return allStickForPair;
     }
 
     private String remainderGivesProfitOrLoss(List<Candlestick> remainder, double profitLimit, double lossLimit) {
@@ -191,11 +257,14 @@ public class BigBackTest {
         double updatedBankroll;
 
         if(result.equals("profit")) {
-            updatedBankroll = currBankroll + (25 * ((TAKE_PROFIT - 0.001) - 1));
+            updatedBankroll = currBankroll + (25 * ((takeProfit - 0.001) - 1));
         } else if(result.equals("loss")) {
-            updatedBankroll = currBankroll + (25 * (TAKE_LOSS - 1));
+            updatedBankroll = currBankroll + (25 * (takeLoss - 1));
         } else {
-            updatedBankroll = currBankroll;
+            //updatedBankroll = updatedBankroll -
+            //updatedBankroll = currBankroll;
+            updatedBankroll = currBankroll + (25 * (takeLoss - 1));
+            //updatedBankroll = currBankroll - 25;
         }
 
         return updatedBankroll;
