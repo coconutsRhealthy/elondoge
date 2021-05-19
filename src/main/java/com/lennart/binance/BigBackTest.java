@@ -18,9 +18,9 @@ public class BigBackTest {
 
     private Map<String, List<Candlestick>> allSticksMap = new HashMap<>();
 
-    public static void main(String[] args) {
-        new BigBackTest().machineLearning();
-    }
+//    public static void main(String[] args) {
+//        new BigBackTest().getAttractiveCoinsDynamically();
+//    }
 
     public List<String> getAttractiveCoinsDynamically() {
         List<String> allPairs = new CoinIdentifier().getAllBusdTradingPairs();

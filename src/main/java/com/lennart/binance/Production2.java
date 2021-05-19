@@ -21,6 +21,7 @@ import java.awt.event.InputEvent;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.binance.api.client.domain.account.NewOrder.*;
@@ -92,7 +93,9 @@ public class Production2 {
 
         for(int i = 0; i < 100_000_000; i++) {
             try {
-                if(enoughTimeSincePrev(timeIsGoodTime) && timeIsGood(13)) {
+                boolean enoughTimeSincePrev = enoughTimeSincePrev(timeIsGoodTime);
+
+                if(enoughTimeSincePrev && timeIsGood(13)) {
                     timeIsGoodTime = new Date().getTime();
                     CoinIdentifier coinIdentifier = new CoinIdentifier();
                     List<String> coinsToBuy = coinIdentifier.getCoinsToBuy(attractiveCoins, 4, 13, 0.98);
@@ -102,6 +105,10 @@ public class Production2 {
                             tradeWrapper(coin);
                         }
                     }
+                }
+
+                if(!enoughTimeSincePrev) {
+                    TimeUnit.SECONDS.sleep(5);
                 }
 
                 if(new Date().getTime() > attractiveCoinRefreshTime + 3_600_000) {
