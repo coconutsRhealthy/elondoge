@@ -179,8 +179,9 @@ public class Production2 {
         if(positionCanBeTraded(minQtyToTrade, amountToBuy, coinToTrade + BASE_COIN)) {
             String amountToBuyString = getAmountToTradeString(amountToBuy, minQtyToTrade);
             System.out.println("amount to buy: " + amountToBuyString);
+            long marketBuyShouldBeAfterThisTime = new Date().getTime();
             placeMarketBuyOrder(coinToTrade, BASE_COIN, amountToBuyString);
-            double buyPrice = getPriceOfLastBuyTrade(coinToTrade + BASE_COIN);
+            double buyPrice = getPriceOfLastBuyTradeWrapper(coinToTrade + BASE_COIN, marketBuyShouldBeAfterThisTime);
             System.out.println("buyprice via last trade: " + buyPrice);
             double position = getPosition(coinToTrade);
             String amountToSellString = getAmountToTradeString(position, minQtyToTrade);
@@ -255,14 +256,35 @@ public class Production2 {
         client.newOcoOrder(ocoSell);
     }
 
-    private double getPriceOfLastBuyTrade(String pair) {
+    private double getPriceOfLastBuyTrade(String pair, long shouldBeAfterThisTime) {
         double priceToReturn = 0;
         List<Trade> allTrades = client.getMyTrades(pair);
         allTrades = allTrades.stream().filter(trade -> trade.isBuyer()).collect(Collectors.toList());
 
         if(!allTrades.isEmpty()) {
             Trade lastTrade = allTrades.get(allTrades.size() - 1);
-            priceToReturn = Double.valueOf(lastTrade.getPrice());
+
+            if(lastTrade.getTime() > shouldBeAfterThisTime) {
+                priceToReturn = Double.valueOf(lastTrade.getPrice());
+            } else {
+                System.out.println("getPriceOfLastBuyTrade() -> No trades in " + pair + " since " + shouldBeAfterThisTime);
+            }
+        } else {
+            System.out.println("getPriceOfLastBuyTrade() -> No trades at all in " + pair);
+        }
+
+        return priceToReturn;
+    }
+
+    private double getPriceOfLastBuyTradeWrapper(String pair, long shouldBeAfterThisTime) {
+        double priceToReturn = 0;
+
+        for(int i = 0; i < 300; i++) {
+            if(priceToReturn != 0) {
+                break;
+            }
+
+            priceToReturn = getPriceOfLastBuyTrade(pair, shouldBeAfterThisTime);
         }
 
         return priceToReturn;
