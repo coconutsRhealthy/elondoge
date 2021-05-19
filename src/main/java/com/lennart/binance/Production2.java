@@ -116,6 +116,13 @@ public class Production2 {
                             " Old size: " + attractiveCoins.size());
                     attractiveCoins = new BigBackTest().getAttractiveCoinsDynamically();
                     System.out.println("New attractive coins size: " + attractiveCoins.size());
+                    System.out.println("New attractive coins list: ");
+
+                    for(int z = 0; z < attractiveCoins.size(); z++) {
+                        System.out.println("" + z + ") " + attractiveCoins.get(z));
+                    }
+
+                    System.out.println();
                     attractiveCoinRefreshTime = new Date().getTime();
                 }
             } catch (Exception e) {
@@ -177,20 +184,42 @@ public class Production2 {
         String minQtyToTrade = getMinQtyToTrade(coinToTrade, BASE_COIN);
 
         if(positionCanBeTraded(minQtyToTrade, amountToBuy, coinToTrade + BASE_COIN)) {
-            String amountToBuyString = getAmountToTradeString(amountToBuy, minQtyToTrade);
-            System.out.println("amount to buy: " + amountToBuyString);
-            long marketBuyShouldBeAfterThisTime = new Date().getTime();
-            placeMarketBuyOrder(coinToTrade, BASE_COIN, amountToBuyString);
-            double buyPrice = getPriceOfLastBuyTradeWrapper(coinToTrade + BASE_COIN, marketBuyShouldBeAfterThisTime);
-            System.out.println("buyprice via last trade: " + buyPrice);
-            double position = getPosition(coinToTrade);
-            String amountToSellString = getAmountToTradeString(position, minQtyToTrade);
-            System.out.println("amount to sell: " + amountToBuyString);
-            String ticksize = getPriceLimitDecimals(coinToTrade, BASE_COIN);
-            placeOcoSell(coinToTrade + BASE_COIN, amountToSellString, getSellLimit(buyPrice, ticksize),
-                    getStopPrice(buyPrice, ticksize), getStopLimitBelowStopPrice(buyPrice, ticksize));
-            System.out.println();
+            if(noActivePositionInThisCoin(coinToTrade)) {
+                String amountToBuyString = getAmountToTradeString(amountToBuy, minQtyToTrade);
+                System.out.println("amount to buy: " + amountToBuyString);
+                long marketBuyShouldBeAfterThisTime = new Date().getTime();
+                placeMarketBuyOrder(coinToTrade, BASE_COIN, amountToBuyString);
+                double buyPrice = getPriceOfLastBuyTradeWrapper(coinToTrade + BASE_COIN, marketBuyShouldBeAfterThisTime);
+                System.out.println("buyprice via last trade: " + buyPrice);
+                double position = getPosition(coinToTrade);
+                String amountToSellString = getAmountToTradeString(position, minQtyToTrade);
+                System.out.println("amount to sell: " + amountToBuyString);
+                String ticksize = getPriceLimitDecimals(coinToTrade, BASE_COIN);
+                placeOcoSell(coinToTrade + BASE_COIN, amountToSellString, getSellLimit(buyPrice, ticksize),
+                        getStopPrice(buyPrice, ticksize), getStopLimitBelowStopPrice(buyPrice, ticksize));
+                System.out.println();
+            }
         }
+    }
+
+    private boolean noActivePositionInThisCoin(String coin) {
+        boolean noActivePositionInCoin = false;
+
+        double numberOfCoinsInPortfolio = getPosition(coin);
+
+        if(numberOfCoinsInPortfolio > 0) {
+            double currentAsk = getCurrentAskPrice(coin, BASE_COIN);
+
+            if(numberOfCoinsInPortfolio * currentAsk > 15) {
+                System.out.println("Already active position in " + coin + ". No new market buy order");
+            } else {
+                noActivePositionInCoin = true;
+            }
+        } else {
+            noActivePositionInCoin = true;
+        }
+
+        return noActivePositionInCoin;
     }
 
     private String getSellLimit(double purchasePrice, String ticksize) {
