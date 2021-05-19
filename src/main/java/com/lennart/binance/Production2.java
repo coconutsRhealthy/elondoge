@@ -88,8 +88,8 @@ public class Production2 {
 
     private void continuous3() {
         long timeIsGoodTime = 0;
-        long attractiveCoinRefreshTime = new Date().getTime();
         List<String> attractiveCoins = new BigBackTest().getAttractiveCoinsDynamically();
+        boolean fiveMinuteAttractiveCoinRefreshNeeded = false;
 
         for(int i = 0; i < 100_000_000; i++) {
             try {
@@ -105,13 +105,15 @@ public class Production2 {
                             tradeWrapper(coin);
                         }
                     }
+
+                    fiveMinuteAttractiveCoinRefreshNeeded = true;
                 }
 
                 if(!enoughTimeSincePrev) {
                     TimeUnit.SECONDS.sleep(5);
                 }
 
-                if(new Date().getTime() > attractiveCoinRefreshTime + 3_600_000) {
+                if(fiveMinuteAttractiveCoinRefreshNeeded) {
                     System.out.println("Gonna refresh attractive coins. Time: " + new Date().getTime() +
                             " Old size: " + attractiveCoins.size());
                     attractiveCoins = new BigBackTest().getAttractiveCoinsDynamically();
@@ -123,7 +125,7 @@ public class Production2 {
                     }
 
                     System.out.println();
-                    attractiveCoinRefreshTime = new Date().getTime();
+                    fiveMinuteAttractiveCoinRefreshNeeded = false;
                 }
             } catch (Exception e) {
                 System.out.println("BINANCE EXCEPTION ERROR");
@@ -350,6 +352,12 @@ public class Production2 {
         minQtyToTrade = minQtyToTrade.replace("1", "0");
 
         String amountInitialAsString = String.valueOf(amountInitial);
+
+        if(amountInitialAsString.contains("E-")) {
+            double tempAmountInitial = amountInitial + 1;
+            amountInitialAsString = String.valueOf(tempAmountInitial);
+            amountInitialAsString = amountInitialAsString.replaceFirst("1", "0");
+        }
 
         String amountInitialAfterDecimal = amountInitialAsString.substring(amountInitialAsString.indexOf(".") + 1,
                 amountInitialAsString.length());
