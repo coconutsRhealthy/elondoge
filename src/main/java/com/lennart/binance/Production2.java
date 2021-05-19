@@ -98,7 +98,7 @@ public class Production2 {
                 if(enoughTimeSincePrev && timeIsGood(13)) {
                     timeIsGoodTime = new Date().getTime();
                     CoinIdentifier coinIdentifier = new CoinIdentifier();
-                    List<String> coinsToBuy = coinIdentifier.getCoinsToBuy(attractiveCoins, 4, 13, 0.98);
+                    List<String> coinsToBuy = coinIdentifier.getCoinsToBuy(attractiveCoins, 4, 13, 0.97);
 
                     for(String coin : coinsToBuy) {
                         if(getCurrentBusdBalance() > 24) {
@@ -225,7 +225,7 @@ public class Production2 {
     }
 
     private String getSellLimit(double purchasePrice, String ticksize) {
-        double sellLimit = purchasePrice * 1.011;
+        double sellLimit = purchasePrice * 1.03;
         DecimalFormat formatter = new DecimalFormat(ticksize);
         String sellLimitString = formatter.format(sellLimit);
         System.out.println("Profit sell limit: " + sellLimitString);
@@ -233,7 +233,7 @@ public class Production2 {
     }
 
     private String getStopPrice(double purchasePrice, String ticksize) {
-        double stopPrice = purchasePrice * 0.95;
+        double stopPrice = purchasePrice * 0.90;
         DecimalFormat formatter = new DecimalFormat(ticksize);
         String stopPriceString = formatter.format(stopPrice);
         System.out.println("Stop price: " + stopPriceString);
@@ -241,7 +241,7 @@ public class Production2 {
     }
 
     private String getStopLimitBelowStopPrice(double purchasePrice, String ticksize) {
-        double stopPriceLimit = purchasePrice * 0.85;
+        double stopPriceLimit = purchasePrice * 0.80;
         DecimalFormat formatter = new DecimalFormat(ticksize);
         String stopPriceLimitString = formatter.format(stopPriceLimit);
         System.out.println("Stop price limit: " + stopPriceLimitString);

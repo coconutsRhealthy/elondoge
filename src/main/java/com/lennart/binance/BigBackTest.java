@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
  */
 public class BigBackTest {
 
-    private double baseNeededProfit = 0.98;
-    private double takeProfit = 1.011;
-    private double takeLoss = 0.95;
+    private double baseNeededProfit = 0.97;
+    private double takeProfit = 1.03;
+    private double takeLoss = 0.90;
 
     private double tempMachineLearningSucces = -1;
     private double tempMachineLearningTotal = -1;
