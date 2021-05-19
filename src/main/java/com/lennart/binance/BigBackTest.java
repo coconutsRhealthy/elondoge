@@ -16,7 +16,10 @@ public class BigBackTest {
     private double takeProfit = 1.011;
     private double takeLoss = 0.95;
 
-    private Map<String, List<Candlestick>> allSticksMap = new HashMap<>();
+    private double tempMachineLearningSucces = -1;
+    private double tempMachineLearningTotal = -1;
+
+    //private Map<String, List<Candlestick>> allSticksMap = new HashMap<>();
 
 //    public static void main(String[] args) {
 //        new BigBackTest().getAttractiveCoinsDynamically();
@@ -29,7 +32,6 @@ public class BigBackTest {
         Map<String, Double> profitTotalMap = new HashMap<>();
 
         for(String pair : allPairs) {
-            System.out.println(pair);
             List<Candlestick> allSticks = getAllCandleSticksForPair(pair, BinanceClientFactory.getBinanceApiClient());
 
             for(int i = 1; i < (allSticks.size() - 1); i++) {
@@ -50,11 +52,11 @@ public class BigBackTest {
                     List<Candlestick> remainder = getRemainderOfStickList(allSticks, i + 1);
                     String result = remainderGivesProfitOrLoss(remainder, takeProfitLimit, takeLossLimit);
 
-                    if(result.equals("profit")) {
-                        if(profitTotalMap.get(pair) == null) {
-                            profitTotalMap.put(pair, 0.0);
-                        }
+                    if(profitTotalMap.get(pair) == null) {
+                        profitTotalMap.put(pair, 0.0);
+                    }
 
+                    if(result.equals("profit")) {
                         double oldValue = profitTotalMap.get(pair);
                         double newValue = oldValue + 1;
                         profitTotalMap.put(pair, newValue);
@@ -102,7 +104,7 @@ public class BigBackTest {
         List<String> allPairs = getAttractiveCoinsDynamically();
 
         for(String pair : allPairs) {
-            System.out.println(pair);
+            //System.out.println(pair);
             List<Candlestick> allSticks = getAllCandleSticksForPair(pair, BinanceClientFactory.getBinanceApiClient());
 
             for(int i = 1; i < (allSticks.size() - 1); i++) {
@@ -121,6 +123,10 @@ public class BigBackTest {
         }
 
         Collections.sort(results);
+
+        tempMachineLearningSucces = (double) Collections.frequency(results, "profit");
+        tempMachineLearningTotal = results.size();
+
         System.out.println();
         System.out.println();
         System.out.println("Profit amount: " + Collections.frequency(results, "profit"));
@@ -139,15 +145,20 @@ public class BigBackTest {
         List<Double> takeProfitList = getTakeProfitList();
         List<Double> takeLossList = getTakeLossList();
 
+        int counter = 0;
+
         for(Double a : baseNeededProfitList) {
             for(Double b : takeProfitList) {
                 for(Double c : takeLossList) {
+                    System.out.println(counter++);
+
                     baseNeededProfit = a;
                     takeProfit = b;
                     takeLoss = c;
 
-                    double profit = getBankrollResultGivenInput(125);
-                    comboProfitMap.put(Arrays.asList(baseNeededProfit,  takeProfit, takeLoss), profit);
+                    double profit = getBankrollResultGivenInput(100);
+                    comboProfitMap.put(Arrays.asList(baseNeededProfit,  takeProfit, takeLoss, tempMachineLearningSucces,
+                            tempMachineLearningTotal), profit);
                 }
             }
         }
@@ -160,7 +171,7 @@ public class BigBackTest {
     private List<Double> getBaseNeededProfitList() {
         List<Double> baseNeededProfitList = new ArrayList<>();
 
-        for(double d = 0.95; d < 1; d = d + 0.025) {
+        for(double d = 0.97; d < 1; d = d + 0.01) {
             baseNeededProfitList.add(d);
         }
 
@@ -170,11 +181,7 @@ public class BigBackTest {
     private List<Double> getTakeProfitList() {
         List<Double> takeProfitList = new ArrayList<>();
 
-//        takeProfitList.add(1.011);
-//        takeProfitList.add(1.05);
-//        takeProfitList.add(2.00);
-
-        for(double d = 1; d <= 2; d = d + 0.1) {
+        for(double d = 1.01; d <= 1.04; d = d + 0.01) {
             takeProfitList.add(d);
         }
 
@@ -184,9 +191,9 @@ public class BigBackTest {
     private List<Double> getTakeLossList() {
         List<Double> takeLossList = new ArrayList<>();
 
-        takeLossList.add(0.95);
-        takeLossList.add(0.96);
-        takeLossList.add(0.97);
+        for(double d = 0.90; d < 1.00; d = d + 0.01) {
+            takeLossList.add(d);
+        }
 
         return takeLossList;
     }
@@ -223,12 +230,12 @@ public class BigBackTest {
     private List<Candlestick> getAllCandleSticksForPair(String pair, BinanceApiRestClient client) {
         List<Candlestick> allStickForPair;
 
-        if(allSticksMap.get(pair) == null) {
+//        if(allSticksMap.get(pair) == null) {
             allStickForPair = client.getCandlestickBars(pair, CandlestickInterval.FIVE_MINUTES);
-            allSticksMap.put(pair, allStickForPair);
-        } else {
-            allStickForPair = allSticksMap.get(pair);
-        }
+//            allSticksMap.put(pair, allStickForPair);
+//        } else {
+//            allStickForPair = allSticksMap.get(pair);
+//        }
 
         return allStickForPair;
     }
@@ -258,11 +265,14 @@ public class BigBackTest {
         double updatedBankroll;
 
         if(result.equals("profit")) {
-            updatedBankroll = currBankroll + (25 * ((takeProfit - 0.001) - 1));
+            updatedBankroll = currBankroll + (25 * ((takeProfit - 0.002) - 1));
+            //updatedBankroll = currBankroll + 0.21;
         } else if(result.equals("loss")) {
-            updatedBankroll = currBankroll + (25 * (takeLoss - 1));
+            updatedBankroll = currBankroll + (25 * (takeLoss - 1.00555));
+            //updatedBankroll = currBankroll - 1.4;
         } else {
-            updatedBankroll = currBankroll + (25 * (takeLoss - 1));
+            updatedBankroll = currBankroll + (25 * (takeLoss - 1.00555));
+            //updatedBankroll = currBankroll - 1.4;
         }
 
         return updatedBankroll;
