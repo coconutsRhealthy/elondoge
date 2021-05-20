@@ -35,7 +35,7 @@ public class CoinIdentifier {
     }
 
     public List<String> getCoinsToBuy(List<String> pairs, int maxNumberOfCoins, int maxSecondsSincsLastObservation,
-                                      double minimumLoss) {
+                                      double minimumProfit) {
         List<String> coinsToBuy = new ArrayList<>();
         Map<String, Double> profits = new HashMap<>();
         BinanceApiRestClient client = BinanceClientFactory.getBinanceApiClient();
@@ -52,13 +52,13 @@ public class CoinIdentifier {
             if(seconds < maxSecondsSincsLastObservation) {
                 double profit = getReturn(newestStick, getSecondNewestCompletedCandlestick(allSticks));
 
-                if(profit < minimumLoss) {
+                if(profit > minimumProfit) {
                     profits.put(pair, profit);
                 }
             }
         }
 
-        profits = sortByValueLowToHigh(profits);
+        profits = sortByValueHighToLow(profits);
 
         if(profits.size() > maxNumberOfCoins) {
             int counter = 0;
@@ -93,7 +93,7 @@ public class CoinIdentifier {
     }
 
     public List<Candlestick> getAllCandleSticksForPair(String pair, BinanceApiRestClient client) {
-        return client.getCandlestickBars(pair, CandlestickInterval.FIVE_MINUTES);
+        return client.getCandlestickBars(pair, CandlestickInterval.ONE_MINUTE);
     }
 
 //    public static void main(String[] args) {

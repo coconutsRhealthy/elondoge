@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
  */
 public class BigBackTest {
 
-    private double baseNeededProfit = 0.97;
-    private double takeProfit = 1.03;
-    private double takeLoss = 0.90;
+    private double baseNeededProfit = 1.01;
+    private double takeProfit = 1.04;
+    private double takeLoss = 0.93;
 
     private double tempMachineLearningSucces = -1;
     private double tempMachineLearningTotal = -1;
@@ -37,7 +37,7 @@ public class BigBackTest {
             for(int i = 1; i < (allSticks.size() - 1); i++) {
                 double profit = getProfit(allSticks.get(i - 1), allSticks.get(i));
 
-                if(profit < baseNeededProfit) {
+                if(profit > baseNeededProfit) {
                     if(amountNeededProfitMap.get(pair) == null) {
                         amountNeededProfitMap.put(pair, 1.0);
                     } else {
@@ -110,7 +110,7 @@ public class BigBackTest {
             for(int i = 1; i < (allSticks.size() - 1); i++) {
                 double profit = getProfit(allSticks.get(i - 1), allSticks.get(i));
 
-                if(profit < baseNeededProfit) {
+                if(profit > baseNeededProfit) {
                     double purchasePrice = determinePurchasePrice(allSticks.get(i + 1));
                     double takeProfitLimit = determineProfitSellPrice(purchasePrice);
                     double takeLossLimit = determineLossSellPrice(purchasePrice);
@@ -171,7 +171,7 @@ public class BigBackTest {
     private List<Double> getBaseNeededProfitList() {
         List<Double> baseNeededProfitList = new ArrayList<>();
 
-        for(double d = 0.97; d < 1; d = d + 0.01) {
+        for(double d = 1.01; d <= 1.03; d = d + 0.01) {
             baseNeededProfitList.add(d);
         }
 
@@ -230,12 +230,12 @@ public class BigBackTest {
     private List<Candlestick> getAllCandleSticksForPair(String pair, BinanceApiRestClient client) {
         List<Candlestick> allStickForPair;
 
-//        if(allSticksMap.get(pair) == null) {
-            allStickForPair = client.getCandlestickBars(pair, CandlestickInterval.FIVE_MINUTES);
-//            allSticksMap.put(pair, allStickForPair);
-//        } else {
-//            allStickForPair = allSticksMap.get(pair);
-//        }
+        //if(allSticksMap.get(pair) == null) {
+            allStickForPair = client.getCandlestickBars(pair, CandlestickInterval.ONE_MINUTE);
+        //    allSticksMap.put(pair, allStickForPair);
+        //} else {
+        //    allStickForPair = allSticksMap.get(pair);
+        //}
 
         return allStickForPair;
     }

@@ -90,6 +90,7 @@ public class Production2 {
         long timeIsGoodTime = 0;
         List<String> attractiveCoins = new BigBackTest().getAttractiveCoinsDynamically();
         boolean fiveMinuteAttractiveCoinRefreshNeeded = false;
+        int evaluateIterationCounter = 0;
 
         for(int i = 0; i < 100_000_000; i++) {
             try {
@@ -98,7 +99,7 @@ public class Production2 {
                 if(enoughTimeSincePrev && timeIsGood(13)) {
                     timeIsGoodTime = new Date().getTime();
                     CoinIdentifier coinIdentifier = new CoinIdentifier();
-                    List<String> coinsToBuy = coinIdentifier.getCoinsToBuy(attractiveCoins, 4, 13, 0.97);
+                    List<String> coinsToBuy = coinIdentifier.getCoinsToBuy(attractiveCoins, 4, 13, 1.01);
 
                     for(String coin : coinsToBuy) {
                         if(getCurrentBusdBalance() > 24) {
@@ -106,11 +107,16 @@ public class Production2 {
                         }
                     }
 
-                    fiveMinuteAttractiveCoinRefreshNeeded = true;
+                    evaluateIterationCounter++;
+
+                    if(evaluateIterationCounter == 5) {
+                        evaluateIterationCounter = 0;
+                        fiveMinuteAttractiveCoinRefreshNeeded = true;
+                    }
                 }
 
                 if(!enoughTimeSincePrev) {
-                    TimeUnit.SECONDS.sleep(5);
+                    TimeUnit.SECONDS.sleep(1);
                 }
 
                 if(fiveMinuteAttractiveCoinRefreshNeeded) {
@@ -136,9 +142,9 @@ public class Production2 {
 
     private boolean enoughTimeSincePrev(long prevTime) {
         long currTime = new Date().getTime();
-        long threeMinutes = 1000 * 180;
+        long thirtySeconds = 30_000;
 
-        if(currTime > (prevTime + threeMinutes)) {
+        if(currTime > (prevTime + thirtySeconds)) {
             return true;
         }
 
@@ -225,7 +231,7 @@ public class Production2 {
     }
 
     private String getSellLimit(double purchasePrice, String ticksize) {
-        double sellLimit = purchasePrice * 1.03;
+        double sellLimit = purchasePrice * 1.04;
         DecimalFormat formatter = new DecimalFormat(ticksize);
         String sellLimitString = formatter.format(sellLimit);
         System.out.println("Profit sell limit: " + sellLimitString);
@@ -233,7 +239,7 @@ public class Production2 {
     }
 
     private String getStopPrice(double purchasePrice, String ticksize) {
-        double stopPrice = purchasePrice * 0.90;
+        double stopPrice = purchasePrice * 0.93;
         DecimalFormat formatter = new DecimalFormat(ticksize);
         String stopPriceString = formatter.format(stopPrice);
         System.out.println("Stop price: " + stopPriceString);
@@ -241,7 +247,7 @@ public class Production2 {
     }
 
     private String getStopLimitBelowStopPrice(double purchasePrice, String ticksize) {
-        double stopPriceLimit = purchasePrice * 0.80;
+        double stopPriceLimit = purchasePrice * 0.83;
         DecimalFormat formatter = new DecimalFormat(ticksize);
         String stopPriceLimitString = formatter.format(stopPriceLimit);
         System.out.println("Stop price limit: " + stopPriceLimitString);
