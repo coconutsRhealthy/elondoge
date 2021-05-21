@@ -44,18 +44,18 @@ public class CoinIdentifier {
 
         for(String pair : pairs) {
             List<Candlestick> allSticks = getAllCandleSticksForPair(pair, client);
-            Candlestick newestStick = getNewestCompletedCandlestick(allSticks);
+            Candlestick newestStick = getNewestCandleStick(allSticks);
             int seconds = getNumberOfSecondsSinceNewestCompletedStickClose(newestStick);
 
             System.out.println("seconds: " + seconds);
 
-            if(seconds < maxSecondsSincsLastObservation) {
-                double profit = getReturn(newestStick, getSecondNewestCompletedCandlestick(allSticks));
+            //if(seconds < maxSecondsSincsLastObservation) {
+                double profit = getReturn(newestStick, getNewestCompletedCandlestick(allSticks));
 
                 if(profit > minimumProfit) {
                     profits.put(pair, profit);
                 }
-            }
+            //}
         }
 
         profits = sortByValueHighToLow(profits);

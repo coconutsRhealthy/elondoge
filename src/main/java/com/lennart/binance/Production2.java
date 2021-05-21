@@ -94,10 +94,10 @@ public class Production2 {
 
         for(int i = 0; i < 100_000_000; i++) {
             try {
-                boolean enoughTimeSincePrev = enoughTimeSincePrev(timeIsGoodTime);
+                //boolean enoughTimeSincePrev = enoughTimeSincePrev(timeIsGoodTime);
 
-                if(enoughTimeSincePrev && timeIsGood(13)) {
-                    timeIsGoodTime = new Date().getTime();
+                //if(enoughTimeSincePrev && timeIsGood(13)) {
+                    //timeIsGoodTime = new Date().getTime();
                     CoinIdentifier coinIdentifier = new CoinIdentifier();
                     List<String> coinsToBuy = coinIdentifier.getCoinsToBuy(attractiveCoins, 4, 13, 1.01);
 
@@ -109,15 +109,15 @@ public class Production2 {
 
                     evaluateIterationCounter++;
 
-                    if(evaluateIterationCounter == 5) {
+                    if(evaluateIterationCounter == 12) {
                         evaluateIterationCounter = 0;
                         fiveMinuteAttractiveCoinRefreshNeeded = true;
                     }
-                }
+                //}
 
-                if(!enoughTimeSincePrev) {
-                    TimeUnit.SECONDS.sleep(1);
-                }
+                //if(!enoughTimeSincePrev) {
+                    TimeUnit.SECONDS.sleep(5);
+                //}
 
                 if(fiveMinuteAttractiveCoinRefreshNeeded) {
                     System.out.println("Gonna refresh attractive coins. Time: " + new Date().getTime() +
