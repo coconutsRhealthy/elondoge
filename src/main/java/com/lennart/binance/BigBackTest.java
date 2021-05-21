@@ -110,7 +110,7 @@ public class BigBackTest {
             for(int i = 1; i < (allSticks.size() - 1); i++) {
                 double profit = getProfit(allSticks.get(i - 1), allSticks.get(i));
 
-                if(profit > baseNeededProfit) {
+                if(baseNeededProfitRequirementIsMet(profit)) {
                     double purchasePrice = determinePurchasePrice(allSticks.get(i + 1));
                     double takeProfitLimit = determineProfitSellPrice(purchasePrice);
                     double takeLossLimit = determineLossSellPrice(purchasePrice);
@@ -136,6 +136,22 @@ public class BigBackTest {
         System.out.println("bankroll: " + bankroll);
 
         return bankroll;
+    }
+
+    private boolean baseNeededProfitRequirementIsMet(double profit) {
+        boolean requirementMet = false;
+
+        if(baseNeededProfit > 1) {
+            if(profit > baseNeededProfit) {
+                requirementMet = true;
+            }
+        } else {
+            if(profit < baseNeededProfit) {
+                requirementMet = true;
+            }
+        }
+
+        return requirementMet;
     }
 
     private void machineLearning() {
@@ -171,7 +187,7 @@ public class BigBackTest {
     private List<Double> getBaseNeededProfitList() {
         List<Double> baseNeededProfitList = new ArrayList<>();
 
-        for(double d = 1.01; d <= 1.03; d = d + 0.01) {
+        for(double d = 0.99; d < 1.00; d = d + 0.001) {
             baseNeededProfitList.add(d);
         }
 
@@ -181,7 +197,7 @@ public class BigBackTest {
     private List<Double> getTakeProfitList() {
         List<Double> takeProfitList = new ArrayList<>();
 
-        for(double d = 1.01; d <= 1.04; d = d + 0.01) {
+        for(double d = 1.007; d <= 1.018; d = d + 0.001) {
             takeProfitList.add(d);
         }
 
@@ -191,7 +207,7 @@ public class BigBackTest {
     private List<Double> getTakeLossList() {
         List<Double> takeLossList = new ArrayList<>();
 
-        for(double d = 0.90; d < 1.00; d = d + 0.01) {
+        for(double d = 0.97; d < 1.00; d = d + 0.01) {
             takeLossList.add(d);
         }
 
