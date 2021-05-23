@@ -45,36 +45,37 @@ public class CoinIdentifier {
         for(String pair : pairs) {
             List<Candlestick> allSticks = getAllCandleSticksForPair(pair, client);
             Candlestick newestStick = getNewestCandleStick(allSticks);
-            int seconds = getNumberOfSecondsSinceNewestCompletedStickClose(newestStick);
+            Candlestick newestCompletedStick = getNewestCompletedCandlestick(allSticks);
+            int seconds = getNumberOfSecondsSinceNewestCompletedStickClose(newestCompletedStick);
 
-            System.out.println("seconds: " + seconds);
+            //System.out.println("secondsSinceNewestCompleted: " + seconds);
 
-            //if(seconds < maxSecondsSincsLastObservation) {
+            if(seconds >= 45) {
                 double profit = getReturn(newestStick, getNewestCompletedCandlestick(allSticks));
 
-                if(profit > minimumProfit) {
+                if(profit < minimumProfit) {
                     profits.put(pair, profit);
                 }
-            //}
-        }
-
-        profits = sortByValueHighToLow(profits);
-
-        if(profits.size() > maxNumberOfCoins) {
-            int counter = 0;
-
-            for(Map.Entry<String, Double> entry : profits.entrySet()) {
-                counter++;
-
-                if(counter < 5) {
-                    coinsToBuy.add(entry.getKey());
-                } else {
-                    break;
-                }
             }
-        } else {
-            coinsToBuy = profits.keySet().stream().collect(Collectors.toList());
         }
+
+//        profits = sortByValueHighToLow(profits);
+//
+//        if(profits.size() > maxNumberOfCoins) {
+//            int counter = 0;
+//
+//            for(Map.Entry<String, Double> entry : profits.entrySet()) {
+//                counter++;
+//
+//                if(counter < 5) {
+//                    coinsToBuy.add(entry.getKey());
+//                } else {
+//                    break;
+//                }
+//            }
+//        } else {
+            coinsToBuy = profits.keySet().stream().collect(Collectors.toList());
+//        }
 
         return coinsToBuy;
     }

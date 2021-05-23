@@ -12,18 +12,18 @@ import java.util.stream.Collectors;
  */
 public class BigBackTest {
 
-    private double baseNeededProfit = 1.01;
-    private double takeProfit = 1.04;
-    private double takeLoss = 0.93;
+    private double baseNeededProfit = 0.994;
+    private double takeProfit = 1.009;
+    private double takeLoss = 0.97;
 
     private double tempMachineLearningSucces = -1;
     private double tempMachineLearningTotal = -1;
 
     //private Map<String, List<Candlestick>> allSticksMap = new HashMap<>();
 
-//    public static void main(String[] args) {
-//        new BigBackTest().getAttractiveCoinsDynamically();
-//    }
+    public static void main(String[] args) {
+        new BigBackTest().getBankrollResultGivenInput(100);
+    }
 
     public List<String> getAttractiveCoinsDynamically() {
         List<String> allPairs = new CoinIdentifier().getAllBusdTradingPairs();
@@ -101,11 +101,16 @@ public class BigBackTest {
 
     private double getBankrollResultGivenInput(double bankroll) {
         List<String> results = new ArrayList<>();
-        List<String> allPairs = getAttractiveCoinsDynamically();
+        //List<String> allPairs = getAttractiveCoinsDynamically();
+        List<String> allPairs = Arrays.asList("DOGEBUSD");
+
+        double buyAndHoldProfit = -1;
 
         for(String pair : allPairs) {
             //System.out.println(pair);
             List<Candlestick> allSticks = getAllCandleSticksForPair(pair, BinanceClientFactory.getBinanceApiClient());
+
+            buyAndHoldProfit = Double.valueOf(allSticks.get(allSticks.size() - 1).getClose()) / Double.valueOf(allSticks.get(0).getClose());
 
             for(int i = 1; i < (allSticks.size() - 1); i++) {
                 double profit = getProfit(allSticks.get(i - 1), allSticks.get(i));
@@ -134,6 +139,9 @@ public class BigBackTest {
         System.out.println("Undeciced amount: " + Collections.frequency(results, "undecided"));
         System.out.println("Total: " + results.size());
         System.out.println("bankroll: " + bankroll);
+        System.out.println();
+        System.out.println("Buy and hold profit: " + buyAndHoldProfit);
+        System.out.println("bankroll buy and hold: " + (100 * buyAndHoldProfit));
 
         return bankroll;
     }

@@ -19,6 +19,7 @@ import com.binance.api.client.domain.market.OrderBookEntry;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -88,7 +89,7 @@ public class Production2 {
 
     private void continuous3() {
         long timeIsGoodTime = 0;
-        List<String> attractiveCoins = new BigBackTest().getAttractiveCoinsDynamically();
+        List<String> attractiveCoins = Arrays.asList("DOGEBUSD");
         boolean fiveMinuteAttractiveCoinRefreshNeeded = false;
         int evaluateIterationCounter = 0;
 
@@ -99,7 +100,7 @@ public class Production2 {
                 //if(enoughTimeSincePrev && timeIsGood(13)) {
                     //timeIsGoodTime = new Date().getTime();
                     CoinIdentifier coinIdentifier = new CoinIdentifier();
-                    List<String> coinsToBuy = coinIdentifier.getCoinsToBuy(attractiveCoins, 4, 13, 1.01);
+                    List<String> coinsToBuy = coinIdentifier.getCoinsToBuy(attractiveCoins, 4, 13, 0.994);
 
                     for(String coin : coinsToBuy) {
                         if(getCurrentBusdBalance() > 24) {
@@ -107,32 +108,32 @@ public class Production2 {
                         }
                     }
 
-                    evaluateIterationCounter++;
-
-                    if(evaluateIterationCounter == 12) {
-                        evaluateIterationCounter = 0;
-                        fiveMinuteAttractiveCoinRefreshNeeded = true;
-                    }
+//                    evaluateIterationCounter++;
+//
+//                    if(evaluateIterationCounter == 12) {
+//                        evaluateIterationCounter = 0;
+//                        fiveMinuteAttractiveCoinRefreshNeeded = true;
+//                    }
                 //}
 
                 //if(!enoughTimeSincePrev) {
-                    TimeUnit.SECONDS.sleep(5);
+                    //TimeUnit.SECONDS.sleep(5);
                 //}
 
-                if(fiveMinuteAttractiveCoinRefreshNeeded) {
-                    System.out.println("Gonna refresh attractive coins. Time: " + new Date().getTime() +
-                            " Old size: " + attractiveCoins.size());
-                    attractiveCoins = new BigBackTest().getAttractiveCoinsDynamically();
-                    System.out.println("New attractive coins size: " + attractiveCoins.size());
-                    System.out.println("New attractive coins list: ");
-
-                    for(int z = 0; z < attractiveCoins.size(); z++) {
-                        System.out.println("" + z + ") " + attractiveCoins.get(z));
-                    }
-
-                    System.out.println();
-                    fiveMinuteAttractiveCoinRefreshNeeded = false;
-                }
+//                if(fiveMinuteAttractiveCoinRefreshNeeded) {
+//                    System.out.println("Gonna refresh attractive coins. Time: " + new Date().getTime() +
+//                            " Old size: " + attractiveCoins.size());
+//                    attractiveCoins = new BigBackTest().getAttractiveCoinsDynamically();
+//                    System.out.println("New attractive coins size: " + attractiveCoins.size());
+//                    System.out.println("New attractive coins list: ");
+//
+//                    for(int z = 0; z < attractiveCoins.size(); z++) {
+//                        System.out.println("" + z + ") " + attractiveCoins.get(z));
+//                    }
+//
+//                    System.out.println();
+//                    fiveMinuteAttractiveCoinRefreshNeeded = false;
+//                }
             } catch (Exception e) {
                 System.out.println("BINANCE EXCEPTION ERROR");
                 e.printStackTrace();
@@ -231,7 +232,7 @@ public class Production2 {
     }
 
     private String getSellLimit(double purchasePrice, String ticksize) {
-        double sellLimit = purchasePrice * 1.04;
+        double sellLimit = purchasePrice * 1.009;
         DecimalFormat formatter = new DecimalFormat(ticksize);
         String sellLimitString = formatter.format(sellLimit);
         System.out.println("Profit sell limit: " + sellLimitString);
@@ -239,7 +240,7 @@ public class Production2 {
     }
 
     private String getStopPrice(double purchasePrice, String ticksize) {
-        double stopPrice = purchasePrice * 0.93;
+        double stopPrice = purchasePrice * 0.97;
         DecimalFormat formatter = new DecimalFormat(ticksize);
         String stopPriceString = formatter.format(stopPrice);
         System.out.println("Stop price: " + stopPriceString);
