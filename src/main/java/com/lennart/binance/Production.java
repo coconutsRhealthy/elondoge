@@ -7,18 +7,18 @@ import com.binance.api.client.domain.OrderType;
 import com.binance.api.client.domain.TimeInForce;
 import com.binance.api.client.domain.account.AssetBalance;
 import com.binance.api.client.domain.account.NewOrder;
-import com.binance.api.client.domain.account.NewOrderResponse;
 import com.binance.api.client.domain.account.Trade;
 import com.binance.api.client.domain.general.ExchangeInfo;
 import com.binance.api.client.domain.general.FilterType;
 import com.binance.api.client.domain.general.SymbolFilter;
 import com.binance.api.client.domain.general.SymbolInfo;
+import com.binance.api.client.domain.market.Candlestick;
+import com.binance.api.client.domain.market.CandlestickInterval;
 import com.binance.api.client.domain.market.OrderBook;
 import com.binance.api.client.domain.market.OrderBookEntry;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -33,12 +33,6 @@ import static com.binance.api.client.domain.account.NewOrder.marketSell;
  */
 public class Production {
 
-    //verkoop al je bestaande posities market
-
-    //doe de analyse welke coins je wil kopen market
-
-    //koop de coins die je wil market voor 25 eur.
-
     private static final double AMOUNT_TO_INVEST_PER_COIN = 25;
     private static final String BASE_COIN = "BUSD";
 
@@ -47,74 +41,55 @@ public class Production {
     private BinanceApiRestClient client;
 
     public Production() {
-        this.client = getBinanceApiClient();
+        this.client = BinanceClientFactory.getBinanceApiClient();
     }
 
-//    public static void main(String[] args) throws Exception {
-//        new Production().continuousLogic();
-//    }
+    public static void main(String[] args) throws Exception {
+        new Production().continuousLogic();
+    }
 
     private void continuousLogic() throws Exception {
-        int counter = 0;
-
-        for(int i = 0; i < 800; i++) {
+        while(true) {
             try {
-                moveMouseIfNeeded(counter);
-                long startTime = new Date().getTime();
+                if(twelveHourCandleAlmostFinished()) {
+                    System.out.println("Time to trade!  Timestamp: " + new Date().getTime());
 
-                System.out.println();
-                System.out.print("****************** Round " + counter++ + " ******************");
-                System.out.println();
+                    System.out.println("--Selling old positions--");
+                    sellAllPositions();
 
-                System.out.println("--Selling positions--");
-                sellAllPositions();
-                System.out.println();
+                    List<String> coinsToBuy = getCoinsToBuyTwelveHour();
+                    coinsToBuy.forEach(coin -> System.out.println("Coin to buy: " + coin));
 
-                System.out.println("--Identifying coins to buy--");
-                List<String> coinsToBuy = getCoinsToBuy();
+                    System.out.println("--Buying new positions--");
+                    buyNewPositions(coinsToBuy);
 
-                if(coinsToBuy.isEmpty()) {
-                    System.out.println("No coins to buy");
+                    TimeUnit.MINUTES.sleep(35);
+                } else {
+                    TimeUnit.MINUTES.sleep(5);
                 }
-                coinsToBuy.forEach(coin -> System.out.println("Coin to buy: " + coin));
-                System.out.println();
-
-                System.out.println("--Buying new positions--");
-                buyNewPositions(coinsToBuy);
-                System.out.println();
-
-                System.out.println("--Waiting 48 sec--");
-                TimeUnit.SECONDS.sleep(48);
-                System.out.println();
-
-                long endTime = new Date().getTime();
-
-                System.out.println();
-                System.out.println("*** Round duration: " + (endTime - startTime) + " ***");
-                System.out.println();
-                System.out.println();
             } catch (Exception e) {
                 System.out.println("ERROR EXCEPTION. Time: " + new Date().getTime());
                 e.printStackTrace();
+                TimeUnit.MINUTES.sleep(35);
             }
         }
     }
 
-    private void continuousLogic2() {
-        //check which coins to buy
-        List<String> coinsToBuy = getCoinsToBuy();
+    private boolean twelveHourCandleAlmostFinished() {
+        List<Candlestick> btcSticks = client.getCandlestickBars("BTCBUSD", CandlestickInterval.TWELVE_HOURLY);
+        Candlestick lastFinishedBtcStick = btcSticks.get(btcSticks.size() - 2);
+        long closeTime = lastFinishedBtcStick.getCloseTime();
+        long currentTime = new Date().getTime();
+        long diffMillies = currentTime - closeTime;
+        long diffSeconds = diffMillies / 1000;
+        long diffMinutes = diffSeconds / 60;
+        int elevenHoursAndFiftyMinutes = 710;
 
-        //buy these coins market
-        for(String coin : coinsToBuy) {
-            if(getCurrentBusdBalance() > 26) {
-                buyNewPosition(coin);
-                //placeLimitSellOrderEIJE();
-            }
+        if(diffMinutes > elevenHoursAndFiftyMinutes) {
+            return true;
         }
 
-        //place limit sell orders and stop loss orders
-
-
+        return false;
     }
 
     private double getCurrentBusdBalance() {
@@ -130,6 +105,32 @@ public class Production {
         List<String> coinsToBuy4max = coinsToBuy.stream().limit(4).collect(Collectors.toList());
         coinsToBuy4max = coinsToBuy4max.stream().map(pair -> pair.replace("BUSD", "")).collect(Collectors.toList());
         return coinsToBuy4max;
+    }
+
+    private List<String> getCoinsToBuyTwelveHour() {
+        List<String> pairs = new CoinIdentifier().getAllBusdTradingPairs();
+        Map<String, List<Candlestick>> stickMap = new HashMap<>();
+
+        for(String pair : pairs) {
+            stickMap.put(pair, client.getCandlestickBars(pair, CandlestickInterval.TWELVE_HOURLY));
+        }
+
+        Map<String, Double> profitOfLastCandleStick = new HashMap<>();
+
+        for(Map.Entry<String, List<Candlestick>> entry : stickMap.entrySet()) {
+            Candlestick mostRecentStick = entry.getValue().get(entry.getValue().size() - 1);
+            Candlestick secondMostRecentStick = entry.getValue().get(entry.getValue().size() - 2);
+            double mostRecentClosePrice = Double.valueOf(mostRecentStick.getClose());
+            double secondMostRecentClosePrice = Double.valueOf(secondMostRecentStick.getClose());
+            double profit = mostRecentClosePrice / secondMostRecentClosePrice;
+            profitOfLastCandleStick.put(entry.getKey(), profit);
+        }
+
+        profitOfLastCandleStick = sortByValueHighToLow(profitOfLastCandleStick);
+        List<String> coinsToBuyTwelveHour = profitOfLastCandleStick.keySet().stream().limit(5).collect(Collectors.toList());
+        coinsToBuyTwelveHour = coinsToBuyTwelveHour.stream().map(coin -> coin.replace("BUSD", "")).collect(Collectors.toList());
+
+        return coinsToBuyTwelveHour;
     }
 
 
@@ -383,5 +384,21 @@ public class Production {
         } catch (AWTException e) {
             e.printStackTrace();
         }
+    }
+
+    private <K, V extends Comparable<? super V>> Map<K, V> sortByValueHighToLow(Map<K, V> map) {
+        List<Map.Entry<K, V>> list = new LinkedList<>( map.entrySet() );
+        Collections.sort(list, new Comparator<Map.Entry<K, V>>() {
+            @Override
+            public int compare(Map.Entry<K, V> o1, Map.Entry<K, V> o2) {
+                return (o2.getValue() ).compareTo( o1.getValue());
+            }
+        });
+
+        Map<K, V> result = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : list) {
+            result.put(entry.getKey(), entry.getValue());
+        }
+        return result;
     }
 }
