@@ -82,10 +82,10 @@ public class Production2 {
         }
     }
 
-    public static void main(String[] args) {
-        //new Production2().continuous3();
-        new Production2().continuous3();
-    }
+//    public static void main(String[] args) {
+//        //new Production2().continuous3();
+//        new Production2().continuous3();
+//    }
 
     private void continuous3() {
         long timeIsGoodTime = 0;

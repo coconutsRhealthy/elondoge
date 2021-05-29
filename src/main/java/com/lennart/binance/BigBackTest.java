@@ -21,9 +21,9 @@ public class BigBackTest {
 
     //private Map<String, List<Candlestick>> allSticksMap = new HashMap<>();
 
-    public static void main(String[] args) {
-        new BigBackTest().getBankrollResultGivenInput(100);
-    }
+//    public static void main(String[] args) {
+//        new BigBackTest().getBankrollResultGivenInput(100);
+//    }
 
     public List<String> getAttractiveCoinsDynamically() {
         List<String> allPairs = new CoinIdentifier().getAllBusdTradingPairs();
