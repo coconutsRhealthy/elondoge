@@ -197,7 +197,11 @@ public class CoinIdentifier {
 //        busdTradingPairs.add("XVGBUSD");
 
 
-
+        //test
+//        busdTradingPairs.add("BTCBUSD");
+//        busdTradingPairs.add("ETHBUSD");
+//        busdTradingPairs.add("DOGEBUSD");
+//        busdTradingPairs.add("LTCBUSD");
 
 
 
@@ -239,15 +243,15 @@ public class CoinIdentifier {
         busdTradingPairs.add("BTGBUSD");
         busdTradingPairs.add("BTTBUSD");
         busdTradingPairs.add("BURGERBUSD");
-        busdTradingPairs.add("BUSDBIDR");
-        busdTradingPairs.add("BUSDBRL");
-        busdTradingPairs.add("BUSDBVND");
-        busdTradingPairs.add("BUSDDAI");
-        busdTradingPairs.add("BUSDRUB");
+        //busdTradingPairs.add("BUSDBIDR");
+        //busdTradingPairs.add("BUSDBRL");
+        //busdTradingPairs.add("BUSDBVND");
+        //busdTradingPairs.add("BUSDDAI");
+        //busdTradingPairs.add("BUSDRUB");
         //busdTradingPairs.add("BUSDTRY");
         //busdTradingPairs.add("BUSDUSDT");
-        busdTradingPairs.add("BUSDVAI");
-        busdTradingPairs.add("BUSDZAR");
+        //busdTradingPairs.add("BUSDVAI");
+        //busdTradingPairs.add("BUSDZAR");
         busdTradingPairs.add("BZRXBUSD");
         busdTradingPairs.add("CAKEBUSD");
         busdTradingPairs.add("CFXBUSD");
