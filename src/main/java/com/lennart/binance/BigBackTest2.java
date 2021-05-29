@@ -3,8 +3,11 @@ package com.lennart.binance;
 import com.binance.api.client.BinanceApiRestClient;
 import com.binance.api.client.domain.market.Candlestick;
 import com.binance.api.client.domain.market.CandlestickInterval;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.math3.stat.StatUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by LennartMac on 24/05/2021.
@@ -13,6 +16,8 @@ public class BigBackTest2 {
 
     Map<String, List<Candlestick>> stickMap = new HashMap<>();
     List<String> allTimeStampsAsString = new ArrayList<>();
+    int amountOfTrades = 0;
+    int maxCoins = 0;
 
     public BigBackTest2(CandlestickInterval candlestickInterval) {
         fillStickMap(candlestickInterval);
@@ -25,27 +30,142 @@ public class BigBackTest2 {
     }
 
     private void method() {
-        double bankroll = 100;
+        //for(int maxCoinAmount = 3; maxCoinAmount <= 5; maxCoinAmount++) {
+            maxCoins = 5;
+            double profitBoundry = 1.04;
+            //for(double d = 80; d <= 140; d = d + 10) {
+                double bankroll = 100;
+                List<Double> allBankrolls = new ArrayList<>();
+                allBankrolls.add(bankroll);
 
-        for(int i = 0; i < allTimeStampsAsString.size() - 1; i++) {
-            System.out.println(i);
-            Map<String, Double> profitsForTimestamp = getProfitsForTimestamp(Long.valueOf(allTimeStampsAsString.get(i)));
-            List<String> top5 = getTop5ofSortedMap(profitsForTimestamp);
-            Map<String, Double> profitsOfTop5AtFirstFollowingTimestamp = getProfitsOfTop5AtFirstFollowingTimestamp(top5,
-                    Long.valueOf(allTimeStampsAsString.get(i + 1)));
-            bankroll = updateBankroll(bankroll, profitsOfTop5AtFirstFollowingTimestamp);
-        }
+                for(int i = 0; i < allTimeStampsAsString.size() - 1; i++) {
+                    //System.out.println(i);
+                    Map<String, Double> profitsForTimestamp = getProfitsForTimestamp(Long.valueOf(allTimeStampsAsString.get(i)));
+                    List<String> top5 = getTop5ofSortedMap(profitsForTimestamp, profitBoundry);
+                    //List<String> top5 = get5randomCoinsOfSortedMap(profitsForTimestamp);
+                    Map<String, Double> profitsOfTop5AtFirstFollowingTimestamp = getProfitsOfTop5AtFirstFollowingTimestamp(top5,
+                            Long.valueOf(allTimeStampsAsString.get(i + 1)));
+                    bankroll = updateBankroll(bankroll, top5, profitsOfTop5AtFirstFollowingTimestamp);
+                    //System.out.println("" + i + ") " + bankroll);
+                    allBankrolls.add(bankroll);
+                }
 
-        System.out.println("FINAL BR: " + bankroll);
-        System.out.println("Buy and hold BTC BR: " + getBankrollIfBuyAndHoldBtc(100, stickMap.get("BTCBUSD")));
+                System.out.println("Max coin amount: " + maxCoins);
+                System.out.println("Profit boundry:" + profitBoundry) ;
+                System.out.println("Amount of trades: " + amountOfTrades);
+                System.out.println("FINAL BR: " + bankroll);
+                System.out.println("Standard deviation: " + getStandardDeviation(allBankrolls));
+                System.out.println("Buy and hold BTC BR: " + getBankrollIfBuyAndHoldBtc(100, stickMap.get("BTCBUSD")));
+                System.out.println();
+                Collections.sort(allBankrolls);
+                System.out.println("wacht");
+            //}
+        //}
     }
 
-    private double updateBankroll(double bankroll, Map<String, Double> profitsTop5Tplus1) {
+    private double updateBankroll(double bankroll, List<String> top5, Map<String, Double> profitsTop5Tplus1) {
+        Map<String, Double> amountToInvestPerCoin = getAmountToInvestPerCoin(bankroll, top5);
+
+        amountOfTrades = amountOfTrades + amountToInvestPerCoin.size();
+
         for(Map.Entry<String, Double> entry : profitsTop5Tplus1.entrySet()) {
-            bankroll = bankroll + (25 * (entry.getValue() - 0.005)) - 25;
+            if(amountToInvestPerCoin.get(entry.getKey()) != null) {
+                bankroll = bankroll + (amountToInvestPerCoin.get(entry.getKey()) * (entry.getValue() - 0.005)) - amountToInvestPerCoin.get(entry.getKey());
+            }
         }
 
+        String bankrollString = String.valueOf(bankroll);
+        bankrollString = bankrollString.replace(".", ",");
+        System.out.println(bankrollString);
+
         return bankroll;
+    }
+
+    private Map<String, Double> getAmountToInvestPerCoin(double currentBankroll, List<String> top5) {
+        if(top5.size() > maxCoins) {
+            top5 = top5.stream().limit(maxCoins).collect(Collectors.toList());
+        }
+
+        Map<String, Double> amountToInvestPerCoin = new HashMap<>();
+
+        if(currentBankroll < 25) {
+            //dead
+            //System.out.println("You are dead");
+        } else {
+            if(currentBankroll < 50) {
+                if(top5.isEmpty()) {
+                    //nothing
+                } else {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll);
+                }
+            } else if(currentBankroll < 75) {
+                if(top5.isEmpty()) {
+                    //nothing
+                } else if(top5.size() == 1) {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll);
+                } else {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll / 2);
+                    amountToInvestPerCoin.put(top5.get(1), currentBankroll / 2);
+                }
+            } else if(currentBankroll < 100) {
+                if(top5.isEmpty()) {
+                    //nothing
+                } else if(top5.size() == 1) {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll);
+                } else if(top5.size() == 2) {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll / 2);
+                    amountToInvestPerCoin.put(top5.get(1), currentBankroll / 2);
+                } else {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll / 3);
+                    amountToInvestPerCoin.put(top5.get(1), currentBankroll / 3);
+                    amountToInvestPerCoin.put(top5.get(2), currentBankroll / 3);
+                }
+            } else if(currentBankroll < 125) {
+                if(top5.isEmpty()) {
+                    //nothing
+                } else if(top5.size() == 1) {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll);
+                } else if(top5.size() == 2) {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll / 2);
+                    amountToInvestPerCoin.put(top5.get(1), currentBankroll / 2);
+                } else if(top5.size() == 3) {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll / 3);
+                    amountToInvestPerCoin.put(top5.get(1), currentBankroll / 3);
+                    amountToInvestPerCoin.put(top5.get(2), currentBankroll / 3);
+                } else {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll / 4);
+                    amountToInvestPerCoin.put(top5.get(1), currentBankroll / 4);
+                    amountToInvestPerCoin.put(top5.get(2), currentBankroll / 4);
+                    amountToInvestPerCoin.put(top5.get(3), currentBankroll / 4);
+                }
+            } else {
+                if(top5.isEmpty()) {
+                    //nothing
+                } else if(top5.size() == 1) {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll);
+                } else if(top5.size() == 2) {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll / 2);
+                    amountToInvestPerCoin.put(top5.get(1), currentBankroll / 2);
+                } else if(top5.size() == 3) {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll / 3);
+                    amountToInvestPerCoin.put(top5.get(1), currentBankroll / 3);
+                    amountToInvestPerCoin.put(top5.get(2), currentBankroll / 3);
+                } else if(top5.size() == 4) {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll / 4);
+                    amountToInvestPerCoin.put(top5.get(1), currentBankroll / 4);
+                    amountToInvestPerCoin.put(top5.get(2), currentBankroll / 4);
+                    amountToInvestPerCoin.put(top5.get(3), currentBankroll / 4);
+                } else {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll / 5);
+                    amountToInvestPerCoin.put(top5.get(1), currentBankroll / 5);
+                    amountToInvestPerCoin.put(top5.get(2), currentBankroll / 5);
+                    amountToInvestPerCoin.put(top5.get(3), currentBankroll / 5);
+                    amountToInvestPerCoin.put(top5.get(4), currentBankroll / 5);
+                }
+            }
+        }
+
+        return amountToInvestPerCoin;
     }
 
     private double getBankrollIfBuyAndHoldBtc(double startBankroll, List<Candlestick> btcCandlesticks) {
@@ -69,19 +189,36 @@ public class BigBackTest2 {
         return top5profitsTplus1;
     }
 
-    private List<String> getTop5ofSortedMap(Map<String, Double> sortedProfitsForTimeT) {
+    private List<String> getTop5ofSortedMap(Map<String, Double> sortedProfitsForTimeT, double profitBoundry) {
         List<String> top5 = new ArrayList<>();
         int counter = 0;
 
         for(Map.Entry<String, Double> entry : sortedProfitsForTimeT.entrySet()) {
-            counter++;
+            if(entry.getValue() > profitBoundry) {
+                counter++;
 
-            if(counter <= 5) {
-                top5.add(entry.getKey());
+                if(counter <= 5) {
+                    top5.add(entry.getKey());
+                }
             }
         }
 
         return top5;
+    }
+
+    private List<String> get5randomCoinsOfSortedMap(Map<String, Double> sortedProfitsForTimeT) {
+        if(sortedProfitsForTimeT.size() < 5) {
+            return new ArrayList<>();
+        } else {
+            List<String> allAvailableCoins = sortedProfitsForTimeT.keySet().stream().collect(Collectors.toList());
+            Set<String> randomCoins = new HashSet<>();
+
+            while(randomCoins.size() < 5) {
+                randomCoins.add(allAvailableCoins.get(new Random().nextInt(allAvailableCoins.size())));
+            }
+
+            return randomCoins.stream().collect(Collectors.toList());
+        }
     }
 
     private Map<String, Double> getProfitsForTimestamp(long timestamp) {
@@ -141,6 +278,14 @@ public class BigBackTest2 {
         }
 
         return profitsForCoin;
+    }
+
+    private double getStandardDeviation(List<Double> values) {
+        Double[] valuesAsArray = values.stream().toArray(Double[]::new);
+        double[] valuesAsArrayDoublePrimitive = ArrayUtils.toPrimitive(valuesAsArray);
+        double variance = StatUtils.variance(valuesAsArrayDoublePrimitive);
+        double standardDeviation = Math.sqrt(variance);
+        return standardDeviation;
     }
 
     private <K, V extends Comparable<? super V>> Map<K, V> sortByValueHighToLow(Map<K, V> map) {
