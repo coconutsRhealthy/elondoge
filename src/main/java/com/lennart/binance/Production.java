@@ -33,12 +33,10 @@ import static com.binance.api.client.domain.account.NewOrder.marketSell;
  */
 public class Production {
 
-    private static final double AMOUNT_TO_INVEST_PER_COIN = 25;
     private static final String BASE_COIN = "BUSD";
-
-
-
     private BinanceApiRestClient client;
+    private static final int MAX_NUMBER_OF_COINS_TO_BUY = 5;
+    private static final double PROFIT_BOUNDRY = 1.04;
 
     public Production() {
         this.client = BinanceClientFactory.getBinanceApiClient();
@@ -93,7 +91,16 @@ public class Production {
     }
 
     private double getCurrentBusdBalance() {
-        return 0;
+        double currBusdBalance = -1;
+        List<AssetBalance> balances = client.getAccount().getBalances();
+
+        for(AssetBalance balance : balances) {
+            if(balance.getAsset().equals("BUSD")) {
+                currBusdBalance = Double.valueOf(balance.getFree());
+            }
+        }
+
+        return currBusdBalance;
     }
 
     private List<String> getCoinsToBuy() {
@@ -127,12 +134,23 @@ public class Production {
         }
 
         profitOfLastCandleStick = sortByValueHighToLow(profitOfLastCandleStick);
-        List<String> coinsToBuyTwelveHour = profitOfLastCandleStick.keySet().stream().limit(5).collect(Collectors.toList());
-        coinsToBuyTwelveHour = coinsToBuyTwelveHour.stream().map(coin -> coin.replace("BUSD", "")).collect(Collectors.toList());
+        List<String> coinsToBuyTwelveHour = new ArrayList<>();
 
+        for(Map.Entry<String, Double> entry : profitOfLastCandleStick.entrySet()) {
+            if(coinsToBuyTwelveHour.size() == MAX_NUMBER_OF_COINS_TO_BUY) {
+                break;
+            }
+
+            if(entry.getValue() > PROFIT_BOUNDRY) {
+                coinsToBuyTwelveHour.add(entry.getKey());
+            }
+        }
+
+        coinsToBuyTwelveHour = coinsToBuyTwelveHour.stream()
+                .map(coin -> coin.replace("BUSD", ""))
+                .collect(Collectors.toList());
         return coinsToBuyTwelveHour;
     }
-
 
     private void sellAllPositions() {
         Map<String, Double> currentPositions = getAllCurrentPositions();
@@ -158,20 +176,87 @@ public class Production {
     }
 
     private void buyNewPositions(List<String> coinsToBuy) {
+        double amountToInvestPerCoin = getAmountToInvestPerCoin(coinsToBuy);
+
         for(String coinToBuy : coinsToBuy) {
-            buyNewPosition(coinToBuy);
+            buyNewPosition(coinToBuy, amountToInvestPerCoin);
         }
     }
 
-    private void buyNewPosition(String coinToBuy) {
+    private void buyNewPosition(String coinToBuy, double amountToInvestPerCoin) {
         double currentAsk = getCurrentAskPrice(coinToBuy, BASE_COIN);
-        double amountToBuy = AMOUNT_TO_INVEST_PER_COIN / currentAsk;
+        double amountToBuy = amountToInvestPerCoin / currentAsk;
         String minQtyToTrade = getMinQtyToTrade(coinToBuy, BASE_COIN);
 
         if(positionCanBeTraded(minQtyToTrade, amountToBuy, coinToBuy + BASE_COIN, false)) {
             String amountToTradeString = getAmountToTradeString2(amountToBuy, minQtyToTrade);
             placeMarketBuyOrder(coinToBuy, BASE_COIN, amountToTradeString);
         }
+    }
+
+    private double getAmountToInvestPerCoin(List<String> coinsToBuy) {
+        double amountToInvestPerCoin = 0;
+        double currBusdBalance = getCurrentBusdBalance();
+        double balanceCorrectionForCostsEtc = 5;
+        currBusdBalance = currBusdBalance - balanceCorrectionForCostsEtc;
+
+        if(currBusdBalance < 25) {
+            System.out.println("Not enough cash to invest, curr busd balance: " + currBusdBalance);
+        } else {
+            if(currBusdBalance < 50) {
+                if(coinsToBuy.isEmpty()) {
+                    //nothing
+                } else {
+                    amountToInvestPerCoin = currBusdBalance;
+                }
+            } else if(currBusdBalance < 75) {
+                if(coinsToBuy.isEmpty()) {
+                    //nothing
+                } else if(coinsToBuy.size() == 1) {
+                    amountToInvestPerCoin = currBusdBalance;
+                } else {
+                    amountToInvestPerCoin = currBusdBalance / 2;
+                }
+            } else if(currBusdBalance < 100) {
+                if(coinsToBuy.isEmpty()) {
+                    //nothing
+                } else if(coinsToBuy.size() == 1) {
+                    amountToInvestPerCoin = currBusdBalance;
+                } else if(coinsToBuy.size() == 2) {
+                    amountToInvestPerCoin = currBusdBalance / 2;
+                } else {
+                    amountToInvestPerCoin = currBusdBalance / 3;
+                }
+            } else if(currBusdBalance < 125) {
+                if(coinsToBuy.isEmpty()) {
+                    //nothing
+                } else if(coinsToBuy.size() == 1) {
+                    amountToInvestPerCoin = currBusdBalance;
+                } else if(coinsToBuy.size() == 2) {
+                    amountToInvestPerCoin = currBusdBalance / 2;
+                } else if(coinsToBuy.size() == 3) {
+                    amountToInvestPerCoin = currBusdBalance / 3;
+                } else {
+                    amountToInvestPerCoin = currBusdBalance / 4;
+                }
+            } else {
+                if(coinsToBuy.isEmpty()) {
+                    //nothing
+                } else if(coinsToBuy.size() == 1) {
+                    amountToInvestPerCoin = currBusdBalance;
+                } else if(coinsToBuy.size() == 2) {
+                    amountToInvestPerCoin = currBusdBalance / 2;
+                } else if(coinsToBuy.size() == 3) {
+                    amountToInvestPerCoin = currBusdBalance / 3;
+                } else if(coinsToBuy.size() == 4) {
+                    amountToInvestPerCoin = currBusdBalance / 4;
+                } else {
+                    amountToInvestPerCoin = currBusdBalance / 5;
+                }
+            }
+        }
+
+        return amountToInvestPerCoin;
     }
 
     private double getCurrentAskPrice(String coinToBuy, String coinToSell) {
