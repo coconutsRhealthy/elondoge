@@ -25,9 +25,9 @@ public class BigBackTest2 {
     }
 
 
-    public static void main(String[] args) {
-        new BigBackTest2(CandlestickInterval.TWELVE_HOURLY).method();
-    }
+//    public static void main(String[] args) {
+//        new BigBackTest2(CandlestickInterval.TWELVE_HOURLY).method();
+//    }
 
     private void method() {
         //for(int maxCoinAmount = 3; maxCoinAmount <= 5; maxCoinAmount++) {
@@ -155,12 +155,57 @@ public class BigBackTest2 {
                     amountToInvestPerCoin.put(top5.get(1), currentBankroll / 4);
                     amountToInvestPerCoin.put(top5.get(2), currentBankroll / 4);
                     amountToInvestPerCoin.put(top5.get(3), currentBankroll / 4);
-                } else {
+                } else if(top5.size() == 5) {
                     amountToInvestPerCoin.put(top5.get(0), currentBankroll / 5);
                     amountToInvestPerCoin.put(top5.get(1), currentBankroll / 5);
                     amountToInvestPerCoin.put(top5.get(2), currentBankroll / 5);
                     amountToInvestPerCoin.put(top5.get(3), currentBankroll / 5);
                     amountToInvestPerCoin.put(top5.get(4), currentBankroll / 5);
+                } else if(top5.size() == 6) {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll / 6);
+                    amountToInvestPerCoin.put(top5.get(1), currentBankroll / 6);
+                    amountToInvestPerCoin.put(top5.get(2), currentBankroll / 6);
+                    amountToInvestPerCoin.put(top5.get(3), currentBankroll / 6);
+                    amountToInvestPerCoin.put(top5.get(4), currentBankroll / 6);
+                    amountToInvestPerCoin.put(top5.get(5), currentBankroll / 6);
+                } else if(top5.size() == 7) {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll / 7);
+                    amountToInvestPerCoin.put(top5.get(1), currentBankroll / 7);
+                    amountToInvestPerCoin.put(top5.get(2), currentBankroll / 7);
+                    amountToInvestPerCoin.put(top5.get(3), currentBankroll / 7);
+                    amountToInvestPerCoin.put(top5.get(4), currentBankroll / 7);
+                    amountToInvestPerCoin.put(top5.get(5), currentBankroll / 7);
+                    amountToInvestPerCoin.put(top5.get(6), currentBankroll / 7);
+                } else if(top5.size() == 8) {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll / 8);
+                    amountToInvestPerCoin.put(top5.get(1), currentBankroll / 8);
+                    amountToInvestPerCoin.put(top5.get(2), currentBankroll / 8);
+                    amountToInvestPerCoin.put(top5.get(3), currentBankroll / 8);
+                    amountToInvestPerCoin.put(top5.get(4), currentBankroll / 8);
+                    amountToInvestPerCoin.put(top5.get(5), currentBankroll / 8);
+                    amountToInvestPerCoin.put(top5.get(6), currentBankroll / 8);
+                    amountToInvestPerCoin.put(top5.get(7), currentBankroll / 8);
+                } else if(top5.size() == 9) {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll / 9);
+                    amountToInvestPerCoin.put(top5.get(1), currentBankroll / 9);
+                    amountToInvestPerCoin.put(top5.get(2), currentBankroll / 9);
+                    amountToInvestPerCoin.put(top5.get(3), currentBankroll / 9);
+                    amountToInvestPerCoin.put(top5.get(4), currentBankroll / 9);
+                    amountToInvestPerCoin.put(top5.get(5), currentBankroll / 9);
+                    amountToInvestPerCoin.put(top5.get(6), currentBankroll / 9);
+                    amountToInvestPerCoin.put(top5.get(7), currentBankroll / 9);
+                    amountToInvestPerCoin.put(top5.get(8), currentBankroll / 9);
+                } else if(top5.size() == 10) {
+                    amountToInvestPerCoin.put(top5.get(0), currentBankroll / 10);
+                    amountToInvestPerCoin.put(top5.get(1), currentBankroll / 10);
+                    amountToInvestPerCoin.put(top5.get(2), currentBankroll / 10);
+                    amountToInvestPerCoin.put(top5.get(3), currentBankroll / 10);
+                    amountToInvestPerCoin.put(top5.get(4), currentBankroll / 10);
+                    amountToInvestPerCoin.put(top5.get(5), currentBankroll / 10);
+                    amountToInvestPerCoin.put(top5.get(6), currentBankroll / 10);
+                    amountToInvestPerCoin.put(top5.get(7), currentBankroll / 10);
+                    amountToInvestPerCoin.put(top5.get(8), currentBankroll / 10);
+                    amountToInvestPerCoin.put(top5.get(9), currentBankroll / 10);
                 }
             }
         }
@@ -174,6 +219,45 @@ public class BigBackTest2 {
         double roi = closeLastCandle / openFirstCandle;
         double totalBankroll = startBankroll * roi;
         return totalBankroll;
+    }
+
+    private void printSpecificHoldProfit(String coin) {
+        List<Candlestick> allSticksForCoin = stickMap.get(coin);
+
+        double bankroll = 1000;
+
+        List<Double> allBankrolls = new ArrayList<>();
+        allBankrolls.add(bankroll);
+
+        for(int i = 1; i < allSticksForCoin.size(); i++) {
+            Candlestick previousStick = allSticksForCoin.get(i - 1);
+            Candlestick currentStick = allSticksForCoin.get(i);
+            double prevClose = Double.valueOf(previousStick.getClose());
+            double currClose = Double.valueOf(currentStick.getClose());
+            double profit = currClose / prevClose;
+            bankroll = bankroll * profit;
+            System.out.println(bankroll);
+            allBankrolls.add(bankroll);
+        }
+
+        double stdDev = getStandardDeviation(allBankrolls);
+
+        System.out.println("stdev: " + stdDev);
+    }
+
+    private List<Double> getProfitsFromBankrolls(List<Double> allBankrolls) {
+        List<Double> profitsFromBankrolls = new ArrayList<>();
+
+        for(int i = 1; i < allBankrolls.size(); i++) {
+            double prevBr = allBankrolls.get(i - 1);
+            double currBr = allBankrolls.get(i);
+            double profit = (currBr / prevBr);
+            profitsFromBankrolls.add(profit);
+        }
+
+        Collections.sort(profitsFromBankrolls);
+
+        return profitsFromBankrolls;
     }
 
     private Map<String, Double> getProfitsOfTop5AtFirstFollowingTimestamp(List<String> top5, long firstFollowingTimestamp) {
@@ -197,7 +281,7 @@ public class BigBackTest2 {
             if(entry.getValue() > profitBoundry) {
                 counter++;
 
-                if(counter <= 5) {
+                if(counter <= maxCoins) {
                     top5.add(entry.getKey());
                 }
             }
