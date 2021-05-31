@@ -243,7 +243,7 @@ public class Production {
                 } else {
                     amountToInvestPerCoin = currBusdBalance / 4;
                 }
-            } else {
+            } else if(currBusdBalance < 150) {
                 if(coinsToBuy.isEmpty()) {
                     //nothing
                 } else if(coinsToBuy.size() == 1) {
@@ -256,6 +256,22 @@ public class Production {
                     amountToInvestPerCoin = currBusdBalance / 4;
                 } else {
                     amountToInvestPerCoin = currBusdBalance / 5;
+                }
+            } else {
+                if(coinsToBuy.isEmpty()) {
+                    //nothing
+                } else if(coinsToBuy.size() == 1) {
+                    amountToInvestPerCoin = currBusdBalance;
+                } else if(coinsToBuy.size() == 2) {
+                    amountToInvestPerCoin = currBusdBalance / 2;
+                } else if(coinsToBuy.size() == 3) {
+                    amountToInvestPerCoin = currBusdBalance / 3;
+                } else if(coinsToBuy.size() == 4) {
+                    amountToInvestPerCoin = currBusdBalance / 4;
+                } else if(coinsToBuy.size() == 5) {
+                    amountToInvestPerCoin = currBusdBalance / 5;
+                } else {
+                    amountToInvestPerCoin = currBusdBalance / 6;
                 }
             }
         }
