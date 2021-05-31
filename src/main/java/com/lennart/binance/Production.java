@@ -35,8 +35,7 @@ public class Production {
 
     private static final String BASE_COIN = "BUSD";
     private BinanceApiRestClient client;
-    private static final int MAX_NUMBER_OF_COINS_TO_BUY = 5;
-    private static final double PROFIT_BOUNDRY = 1.04;
+    private static final int MAX_NUMBER_OF_COINS_TO_BUY = 6;
 
     public Production() {
         this.client = BinanceClientFactory.getBinanceApiClient();
@@ -137,12 +136,10 @@ public class Production {
         List<String> coinsToBuyTwelveHour = new ArrayList<>();
 
         for(Map.Entry<String, Double> entry : profitOfLastCandleStick.entrySet()) {
+            coinsToBuyTwelveHour.add(entry.getKey());
+
             if(coinsToBuyTwelveHour.size() == MAX_NUMBER_OF_COINS_TO_BUY) {
                 break;
-            }
-
-            if(entry.getValue() > PROFIT_BOUNDRY) {
-                coinsToBuyTwelveHour.add(entry.getKey());
             }
         }
 
@@ -163,6 +160,13 @@ public class Production {
                 placeMarketSellOrder(entry.getKey(), BASE_COIN, amountToTradeString);
             }
         }
+    }
+
+    private Map<String, Double> dontSellFutureCoinsToBuy(Map<String, Double> currentPositions, List<String> futureCoinsToBuy) {
+        Map<String, Double> currentPositionsFutureCoinsToBuyRemoved = currentPositions.entrySet().stream()
+                .filter(entry -> !futureCoinsToBuy.contains(entry.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return currentPositionsFutureCoinsToBuyRemoved;
     }
 
     private void placeLimitSellOrderEIJE(String coin, double amount, double limit) {
