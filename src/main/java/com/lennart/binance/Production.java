@@ -389,7 +389,7 @@ public class Production {
                 amountInitialAsString.length());
         String minQtyToTradeAfterDecimal = minQtyToTrade.substring(minQtyToTrade.indexOf(".") + 1, minQtyToTrade.length());
 
-        if(Double.valueOf(amountInitialAfterDecimal) > Double.valueOf(minQtyToTradeAfterDecimal)) {
+        if(Double.valueOf(amountInitialAfterDecimal.length()) > Double.valueOf(minQtyToTradeAfterDecimal.length())) {
             int diff = amountInitialAfterDecimal.length() - minQtyToTradeAfterDecimal.length();
             amountInitialAsString = amountInitialAsString.substring(0, amountInitialAsString.length() - diff);
         }
