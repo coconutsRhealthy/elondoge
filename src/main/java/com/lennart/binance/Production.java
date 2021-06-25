@@ -46,15 +46,17 @@ public class Production {
     }
 
     private void continuousLogic() throws Exception {
+        List<String> coinsToBuy = new ArrayList<>();
+
         while(true) {
             try {
                 if(twelveHourCandleAlmostFinished()) {
                     System.out.println("Time to trade!  Timestamp: " + new Date().getTime());
 
                     System.out.println("--Selling old positions--");
-                    sellAllPositions();
+                    sellAllPositions(coinsToBuy);
 
-                    List<String> coinsToBuy = getCoinsToBuyTwelveHour();
+                    coinsToBuy = getCoinsToBuyTwelveHour();
                     coinsToBuy.forEach(coin -> System.out.println("Coin to buy: " + coin));
 
                     System.out.println("--Buying new positions--");
@@ -149,10 +151,17 @@ public class Production {
         return coinsToBuyTwelveHour;
     }
 
-    private void sellAllPositions() {
-        Map<String, Double> currentPositions = getAllCurrentPositions();
+    private void sellAllPositions(List<String> coinsToSell) {
+        Map<String, Double> allCurrentPositions = getAllCurrentPositions();
+        Map<String, Double> currentPositionsToSell = new HashMap<>();
 
-        for(Map.Entry<String, Double> entry : currentPositions.entrySet()) {
+        for(Map.Entry<String, Double> entry : allCurrentPositions.entrySet()) {
+            if(coinsToSell.contains(entry.getKey())) {
+                currentPositionsToSell.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        for(Map.Entry<String, Double> entry : currentPositionsToSell.entrySet()) {
             String minQtyToTrade = getMinQtyToTrade(entry.getKey(), BASE_COIN);
 
             if(positionCanBeTraded(minQtyToTrade, entry.getValue(), entry.getKey() + BASE_COIN, true)) {
