@@ -138,10 +138,16 @@ public class Production {
         List<String> coinsToBuyTwelveHour = new ArrayList<>();
 
         for(Map.Entry<String, Double> entry : profitOfLastCandleStick.entrySet()) {
-            coinsToBuyTwelveHour.add(entry.getKey());
+            double currentAsk = getCurrentAskPrice(entry.getKey().replace("BUSD", ""), BASE_COIN);
 
-            if(coinsToBuyTwelveHour.size() == MAX_NUMBER_OF_COINS_TO_BUY) {
-                break;
+            if(currentAsk != -1) {
+                coinsToBuyTwelveHour.add(entry.getKey());
+
+                if(coinsToBuyTwelveHour.size() == MAX_NUMBER_OF_COINS_TO_BUY) {
+                    break;
+                }
+            } else {
+                System.out.println("Current ask is zero for: " + entry.getKey());
             }
         }
 
@@ -198,12 +204,17 @@ public class Production {
 
     private void buyNewPosition(String coinToBuy, double amountToInvestPerCoin) {
         double currentAsk = getCurrentAskPrice(coinToBuy, BASE_COIN);
-        double amountToBuy = amountToInvestPerCoin / currentAsk;
-        String minQtyToTrade = getMinQtyToTrade(coinToBuy, BASE_COIN);
 
-        if(positionCanBeTraded(minQtyToTrade, amountToBuy, coinToBuy + BASE_COIN, false)) {
-            String amountToTradeString = getAmountToTradeString2(amountToBuy, minQtyToTrade);
-            placeMarketBuyOrder(coinToBuy, BASE_COIN, amountToTradeString);
+        if(currentAsk != -1) {
+            double amountToBuy = amountToInvestPerCoin / currentAsk;
+            String minQtyToTrade = getMinQtyToTrade(coinToBuy, BASE_COIN);
+
+            if(positionCanBeTraded(minQtyToTrade, amountToBuy, coinToBuy + BASE_COIN, false)) {
+                String amountToTradeString = getAmountToTradeString2(amountToBuy, minQtyToTrade);
+                placeMarketBuyOrder(coinToBuy, BASE_COIN, amountToTradeString);
+            }
+        } else {
+            System.out.println("Yo current ask is still zero! Shouldnt come here.");
         }
     }
 
@@ -291,8 +302,13 @@ public class Production {
     private double getCurrentAskPrice(String coinToBuy, String coinToSell) {
         OrderBook orderBook = client.getOrderBook(coinToBuy + coinToSell, 10);
         List<OrderBookEntry> asks = orderBook.getAsks();
-        OrderBookEntry firstAskEntry = asks.get(0);
-        return Double.valueOf(firstAskEntry.getPrice());
+
+        if(asks != null && !asks.isEmpty()) {
+            OrderBookEntry firstAskEntry = asks.get(0);
+            return Double.valueOf(firstAskEntry.getPrice());
+        } else {
+            return -1;
+        }
     }
 
     private Map<String, Double> getAllCurrentPositions() {

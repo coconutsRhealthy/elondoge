@@ -62,8 +62,8 @@ public class Production2 {
 //        sell.stopL(stopLimitPrice);
 //        return sell;
 
-        NewOrder eije = NewOrder.ocoSell("DOGEBUSD", "25", "0.56", "0.48", "0.47");
-        client.newOcoOrder(eije);
+//        NewOrder eije = NewOrder.ocoSell("DOGEBUSD", "25", "0.56", "0.48", "0.47");
+//        client.newOcoOrder(eije);
 
         //NewOrder buy = NewOrder.ocoBuy("XRPBTC", "5", "0.00002675", "0.00002800", "0.00002840");
         //client.newOcoOrder()
@@ -290,8 +290,8 @@ public class Production2 {
 //    }
 
     private void placeOcoSell(String symbol, String quantity, String price, String stopPrice, String stopLimitPrice) {
-        NewOrder ocoSell = NewOrder.ocoSell(symbol, quantity, price, stopPrice, stopLimitPrice);
-        client.newOcoOrder(ocoSell);
+//        NewOrder ocoSell = NewOrder.ocoSell(symbol, quantity, price, stopPrice, stopLimitPrice);
+//        client.newOcoOrder(ocoSell);
     }
 
     private double getPriceOfLastBuyTrade(String pair, long shouldBeAfterThisTime) {
